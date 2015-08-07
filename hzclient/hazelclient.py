@@ -10,6 +10,11 @@ from hzclient.connectmanager import ConnectionManager
 class HazelcastClient(object):
     def __init__(self):
         self.connection=ConnectionManager()
+        response=self.connection.getPackageWithCorrelationId(0,True)
+        if response is not None:
+            print "Connection has been initalized"
+        else:
+            print "None"
 
     def getAtomicLong(self,title):
         mylong=ALongProxy(title,self.connection)

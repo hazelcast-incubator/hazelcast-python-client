@@ -3,16 +3,17 @@ import asyncore, socket,asynchat,time,threading
 from clientmessage import AuthenticationMessage
 from clientmessage import ClientMessage
 
+
 class ConnectionManager(object):
     def __init__(self,smart=False):
         self.messages={}
+        self.__correlationid__=0
         self.connections=[]
         self.events=[]
         self.eventregistry={}
         self.connected=False
-        firstConnection=HazelConnection('127.0.0.1',5701,self)
+        firstConnection=HazelConnection('127.0.0.1',5702,self)
         self.connections.append(firstConnection)
-        self.__correlationid__=0
         asyncore.loop(count=1)
         #else:
             #raise Timeout Exception
@@ -24,9 +25,14 @@ class ConnectionManager(object):
 
     def adjustCorrelationId(self,clientmsg):
         clientmsg.correlation=self.__correlationid__
-        self.__correlationid__+=1
+        self.__correlationid__ += 1
 
     def getPackageWithCorrelationId(self,id,retry=False):
+        #do submission stuff up here
+        mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
+        mythread.start()
+        mythread.join(timeout=5000)
+
         if id in self.messages.keys():
             return self.messages[id]
         elif retry:
@@ -35,12 +41,12 @@ class ConnectionManager(object):
             mythread.join()
             return self.messages[id]
         else:
+            #ping the server to keep the connection alive
             return None
 
     def waitForPackageWithCorrelationId(self,id):
         while id not in self.messages.keys():
             asyncore.loop(count=1)
-
 
 
 class HazelConnection(asyncore.dispatcher):
@@ -50,7 +56,9 @@ class HazelConnection(asyncore.dispatcher):
         self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
         self.connect((address,port))
         self.manager=manager
-        self.writebuffer="CB2PHY"+AuthenticationMessage().encodeMessage()
+        msg=AuthenticationMessage
+        self.writebuffer="CB2PER"+AuthenticationMessage().encodeMessage()
+        self.manager.adjustCorrelationId(msg)
         self.readbuffer=[]
         self.receiving=False
         self.initialized=False
@@ -64,6 +72,6 @@ class HazelConnection(asyncore.dispatcher):
     def process_input(self,input):
         clientmsg=ClientMessage.decodeMessage(input)
         if clientmsg.isEvent():
-            self.manager.events.append(input)
+            self.manager.eventregistry[clientmsg.correlation].handle(clientmsg)
         else:
             self.manager.messages[clientmsg.correlation]=input

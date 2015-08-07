@@ -14,3 +14,19 @@ def hzstringbytes(str):
 
     final=constant+bytearray([0x00,0x00])+second+second+first+str.encode("UTF8")
     return encode.encodeuint32(len(final))+final
+
+def decodehzstring(byteobject):
+
+    #we should really use a decoder here but screw it
+    byteobject=byteobject[14:]
+    size=struct.unpack("!i",byteobject[:4])
+    byteobject=byteobject[4:]
+    size2=struct.unpack("!h",byteobject[:2])
+    byteobject=byteobject[2:]
+    print size == size2
+    if size != size2:
+        print size
+        print size2
+    mystr=byteobject.decode("UTF8")
+    print len(mystr)
+    return mystr

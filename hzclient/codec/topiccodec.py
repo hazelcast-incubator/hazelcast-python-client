@@ -136,7 +136,10 @@ class TopicAddMessageListenerCodec:
         clientMessage.set(uuid)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
+
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_TOPIC):
@@ -146,7 +149,7 @@ class TopicAddMessageListenerCodec:
                 publishTime = clientMessage.extractLongFromPayload()
                 uuid=None
                 uuid = clientMessage.extractStringFromPayload()
-                self.handle(item, publishTime, uuid)
+                self.handler.handle(item, publishTime, uuid)
                 return
 
 

@@ -213,7 +213,7 @@ class AuthenticationMessage(ClientMessage):
         self.initializeAuthentication()
 
     def initializeAuthentication(self):
-        username="dev2"
+        username="dev"
         password="dev-pass2"
         self.optype=0x2
         uuIDisNull=True

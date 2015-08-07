@@ -3,6 +3,7 @@ import sys
 
 from util import util
 from hzclient.hazelclient import HazelcastClient
+import messagehandler
 def main():
     client=HazelcastClient()
     mytopic=client.getTopic("my-topic")
