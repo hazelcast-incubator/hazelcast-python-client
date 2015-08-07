@@ -7,6 +7,7 @@ from clientmessage import ClientMessage
 class ConnectionManager(object):
     def __init__(self,smart=False):
         self.messages={}
+        self.proxies=[]
         self.__correlationid__=0
         self.connections=[]
         self.events=[]
@@ -15,6 +16,7 @@ class ConnectionManager(object):
         firstConnection=HazelConnection('127.0.0.1',5702,self)
         self.connections.append(firstConnection)
         asyncore.loop(count=1)
+        self.step()
         #else:
             #raise Timeout Exception
 
@@ -31,7 +33,7 @@ class ConnectionManager(object):
         #do submission stuff up here
         mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
         mythread.start()
-        mythread.join(timeout=500)
+        mythread.join(timeout=5000)
 
         if id in self.messages.keys():
             return self.messages[id]
@@ -48,6 +50,18 @@ class ConnectionManager(object):
         while id not in self.messages.keys():
             asyncore.loop(count=1)
 
+    '''
+    method for manager to process events outside of the io thread
+    '''
+    def step(self):
+        for event in self.events:
+            id=event.correlation
+            for ids in self.eventregistry:
+                if id == ids:
+                    self.eventregistry[id].handle(event)
+        asyncore.loop(count=1)
+        #anything else that should be here
+        threading.Timer(1, self.step).start()
 
 class HazelConnection(asyncore.dispatcher):
 
@@ -72,7 +86,6 @@ class HazelConnection(asyncore.dispatcher):
     def process_input(self,input):
         clientmsg=ClientMessage.decodeMessage(input)
         if clientmsg.isEvent():
-            mythread=threading.Thread(target=self.manager.eventregistry[clientmsg.correlation].handle,args=(clientmsg,))
-            mythread.start()
+            self.manager.events.append(clientmsg)
         else:
             self.manager.messages[clientmsg.correlation]=input

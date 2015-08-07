@@ -2276,10 +2276,13 @@ class MapAddEntryListenerCodec:
                 eventType=None
                 eventType = clientMessage.extractIntFromPayload()
                 uuid=None
-                uuid = clientMessage.extractStringFromPayload()
-                numberOfAffectedEntries=None
-                numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, "", 1)
+
+                #uuid = clientMessage.extractStringFromPayload()
+                #numberOfAffectedEntries=None
+                #numberOfAffectedEntries = clientMessage.extractIntFromPayload()
+                #self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
                 return
 
 

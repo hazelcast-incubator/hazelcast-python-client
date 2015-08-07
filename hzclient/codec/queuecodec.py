@@ -41,14 +41,14 @@ class QueueOfferCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueOfferCodec.REQUEST_TYPE
-            name=None
-            value=None
-            timeoutMillis=None
-
-    def encodeRequest(self, name, value, timeoutMillis):
+            self.TYPE = QueueOfferCodec.REQUEST_TYPE
+            self.name=None
+            self.value=None
+            self.timeoutMillis=None
+    @classmethod
+    def encodeRequest(cls, name, value, timeoutMillis):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueOfferCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueOfferCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueOfferCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(value)
@@ -56,8 +56,8 @@ class QueueOfferCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueOfferCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -66,7 +66,7 @@ class QueueOfferCodec:
         value = clientMessage.extractBytesFromPayload()
         parameters.value = value
         timeoutMillis=None
-        timeoutMillis = clientMessage.extractLongFromPayload();
+        timeoutMillis = clientMessage.extractLongFromPayload()
         parameters.timeoutMillis = timeoutMillis
         return parameters
 
@@ -74,20 +74,22 @@ class QueueOfferCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueOfferCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueOfferCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueOfferCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueOfferCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
 
 
@@ -101,24 +103,22 @@ class QueuePutCodec:
     '''************************ REQUEST *************************'''
 
     class RequestParameters:
-        TYPE = QueuePutCodec.REQUEST_TYPE
-        name=None
-        value=None
-
         def __init__(self):
-            temp=None
-
-    def encodeRequest(self, name, value):
+            self.TYPE = QueuePutCodec.REQUEST_TYPE
+            self.name=None
+            self.value=None
+    @classmethod
+    def encodeRequest(cls, name, value):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueuePutCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueuePutCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueuePutCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(value)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueuePutCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -130,13 +130,22 @@ class QueuePutCodec:
 
     '''************************ RESPONSE *************************'''
 
-    def encodeResponse(self):
+    class ResponseParameters:
+        def __init__(self):
+            self.TYPE = QueuePutCodec.RESPONSE_TYPE
+    @classmethod
+    def encodeResponse(cls, ):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueuePutCodec.RESPONSE_TYPE)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
-        return None
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
+        parameters=QueuePutCodec.ResponseParameters()
+
+        return parameters
+
+
 
 class QueueSizeCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_SIZE
@@ -147,10 +156,10 @@ class QueueSizeCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueSizeCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueSizeCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueSizeCodec.REQUEST_TYPE.id)
         clientMessage.setRetryable(QueueSizeCodec.RETRYABLE)
@@ -158,8 +167,8 @@ class QueueSizeCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueSizeCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -170,20 +179,25 @@ class QueueSizeCodec:
 
     class ResponseParameters:
         def __init__(self):
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueSizeCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueSizeCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueSizeCodec.ResponseParameters()
         response=None
         response = clientMessage.extractIntFromPayload()
         parameters.response = response
+
         return parameters
+
+
 
 class QueueRemoveCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_REMOVE
@@ -194,21 +208,21 @@ class QueueRemoveCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueRemoveCodec.REQUEST_TYPE
-            name=None
-            value=None
-
-    def encodeRequest(self, name, value):
+            self.TYPE = QueueRemoveCodec.REQUEST_TYPE
+            self.name=None
+            self.value=None
+    @classmethod
+    def encodeRequest(cls, name, value):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueRemoveCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueRemoveCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueRemoveCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(value)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueRemoveCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -222,20 +236,22 @@ class QueueRemoveCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueRemoveCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueRemoveCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueRemoveCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueRemoveCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
 
 
@@ -248,21 +264,21 @@ class QueuePollCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueuePollCodec.REQUEST_TYPE
-            name=None
-            timeoutMillis=None
-
-    def encodeRequest(self, name, timeoutMillis):
+            self.TYPE = QueuePollCodec.REQUEST_TYPE
+            self.name=None
+            self.timeoutMillis=None
+    @classmethod
+    def encodeRequest(cls, name, timeoutMillis):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueuePollCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueuePollCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueuePollCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(timeoutMillis)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueuePollCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -276,10 +292,10 @@ class QueuePollCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueuePollCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueuePollCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueuePollCodec.RESPONSE_TYPE)
         response_isNull=None
@@ -290,16 +306,20 @@ class QueuePollCodec:
             response_isNull= False
             clientMessage.set(response_isNull)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueuePollCodec.ResponseParameters()
         response=None
         response_isNull = clientMessage.extractBooleanFromPayload()
         if not response_isNull:
             response = clientMessage.extractBytesFromPayload()
         parameters.response = response
+
         return parameters
+
+
 
 class QueueTakeCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_TAKE
@@ -310,19 +330,19 @@ class QueueTakeCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueTakeCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueTakeCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueTakeCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueTakeCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueTakeCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueTakeCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -333,10 +353,10 @@ class QueueTakeCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueTakeCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueTakeCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueTakeCodec.RESPONSE_TYPE)
         response_isNull=None
@@ -347,16 +367,19 @@ class QueueTakeCodec:
             response_isNull= False
             clientMessage.set(response_isNull)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueTakeCodec.ResponseParameters()
         response=None
         response_isNull = clientMessage.extractBooleanFromPayload()
         if not response_isNull:
             response = clientMessage.extractBytesFromPayload()
         parameters.response = response
+
         return parameters
+
 
 class QueuePeekCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_PEEK
@@ -367,19 +390,19 @@ class QueuePeekCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueuePeekCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueuePeekCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueuePeekCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueuePeekCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueuePeekCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueuePeekCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -390,10 +413,10 @@ class QueuePeekCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueuePeekCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueuePeekCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueuePeekCodec.RESPONSE_TYPE)
         response_isNull=None
@@ -404,15 +427,17 @@ class QueuePeekCodec:
             response_isNull= False
             clientMessage.set(response_isNull)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueuePeekCodec.ResponseParameters()
         response=None
         response_isNull = clientMessage.extractBooleanFromPayload()
         if not response_isNull:
             response = clientMessage.extractBytesFromPayload()
         parameters.response = response
+
         return parameters
 
 class QueueIteratorCodec:
@@ -424,19 +449,19 @@ class QueueIteratorCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueIteratorCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueIteratorCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueIteratorCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueIteratorCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueIteratorCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueIteratorCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -447,18 +472,19 @@ class QueueIteratorCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueIteratorCodec.RESPONSE_TYPE
-            list=None
-
-    def encodeResponse(list):
+            self.TYPE = QueueIteratorCodec.RESPONSE_TYPE
+            self.list=None
+    @classmethod
+    def encodeResponse(cls, list):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueIteratorCodec.RESPONSE_TYPE)
         clientMessage.set(list.size())
         for list_item in list:
             clientMessage.set(list_item)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueIteratorCodec.ResponseParameters()
         list=None
         list_size = clientMessage.extractIntFromPayload()
@@ -468,7 +494,10 @@ class QueueIteratorCodec:
             list_item = clientMessage.extractBytesFromPayload()
             list.append(list_item)
         parameters.list = list
+
         return parameters
+
+
 
 class QueueDrainToCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_DRAINTO
@@ -479,19 +508,19 @@ class QueueDrainToCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueDrainToCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueDrainToCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueDrainToCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueDrainToCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueDrainToCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueDrainToCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -502,28 +531,32 @@ class QueueDrainToCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueDrainToCodec.RESPONSE_TYPE
-            list=None
-
-    def encodeResponse(list):
+            self.TYPE = QueueDrainToCodec.RESPONSE_TYPE
+            self.list=None
+    @classmethod
+    def encodeResponse(cls, list):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueDrainToCodec.RESPONSE_TYPE)
         clientMessage.set(list.size())
         for list_item in list:
             clientMessage.set(list_item)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueDrainToCodec.ResponseParameters()
         list=None
         list_size = clientMessage.extractIntFromPayload()
         list = []
         for i in range(list_size):
             list_item=None
-        list_item = clientMessage.extractBytesFromPayload()
-        list.append(list_item)
+            list_item = clientMessage.extractBytesFromPayload()
+            list.append(list_item)
         parameters.list = list
+
         return parameters
+
+
 
 class QueueDrainToMaxSizeCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_DRAINTOMAXSIZE
@@ -534,21 +567,21 @@ class QueueDrainToMaxSizeCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueDrainToMaxSizeCodec.REQUEST_TYPE
-            name=None
-            maxSize=None
-
-    def encodeRequest(self, name, maxSize):
+            self.TYPE = QueueDrainToMaxSizeCodec.REQUEST_TYPE
+            self.name=None
+            self.maxSize=None
+    @classmethod
+    def encodeRequest(cls, name, maxSize):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueDrainToMaxSizeCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueDrainToMaxSizeCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueDrainToMaxSizeCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(maxSize)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueDrainToMaxSizeCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -562,18 +595,19 @@ class QueueDrainToMaxSizeCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueDrainToMaxSizeCodec.RESPONSE_TYPE
-            list=None
-
-    def encodeResponse(list):
+            self.TYPE = QueueDrainToMaxSizeCodec.RESPONSE_TYPE
+            self.list=None
+    @classmethod
+    def encodeResponse(cls, list):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueDrainToMaxSizeCodec.RESPONSE_TYPE)
         clientMessage.set(list.size())
         for list_item in list:
             clientMessage.set(list_item)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueDrainToMaxSizeCodec.ResponseParameters()
         list=None
         list_size = clientMessage.extractIntFromPayload()
@@ -583,6 +617,7 @@ class QueueDrainToMaxSizeCodec:
             list_item = clientMessage.extractBytesFromPayload()
             list.append(list_item)
         parameters.list = list
+
         return parameters
 
 
@@ -596,21 +631,21 @@ class QueueContainsCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueContainsCodec.REQUEST_TYPE
-            name=None
-            value=None
-
-    def encodeRequest(self, name, value):
+            self.TYPE = QueueContainsCodec.REQUEST_TYPE
+            self.name=None
+            self.value=None
+    @classmethod
+    def encodeRequest(cls, name, value):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueContainsCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueContainsCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueContainsCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(value)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueContainsCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -624,21 +659,24 @@ class QueueContainsCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueContainsCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueContainsCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueContainsCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueContainsCodec.ResponseParameters()
         response=None
-        response = clientMessage.extractBooleanFromPayload();
+        response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
+
 
 class QueueContainsAllCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_CONTAINSALL
@@ -649,13 +687,13 @@ class QueueContainsAllCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueContainsAllCodec.REQUEST_TYPE
-            name=None
-            dataList=None
-
-    def encodeRequest(self, name, dataList):
+            self.TYPE = QueueContainsAllCodec.REQUEST_TYPE
+            self.name=None
+            self.dataList=None
+    @classmethod
+    def encodeRequest(cls, name, dataList):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueContainsAllCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueContainsAllCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueContainsAllCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(dataList.size())
@@ -664,8 +702,8 @@ class QueueContainsAllCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueContainsAllCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -684,20 +722,22 @@ class QueueContainsAllCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueContainsAllCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueContainsAllCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueContainsAllCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueContainsAllCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
 
 
@@ -710,13 +750,13 @@ class QueueCompareAndRemoveAllCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueCompareAndRemoveAllCodec.REQUEST_TYPE
-            name=None
-            dataList=None
-
-    def encodeRequest(self, name, dataList):
+            self.TYPE = QueueCompareAndRemoveAllCodec.REQUEST_TYPE
+            self.name=None
+            self.dataList=None
+    @classmethod
+    def encodeRequest(cls, name, dataList):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueCompareAndRemoveAllCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueCompareAndRemoveAllCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueCompareAndRemoveAllCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(dataList.size())
@@ -725,8 +765,8 @@ class QueueCompareAndRemoveAllCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueCompareAndRemoveAllCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -745,21 +785,24 @@ class QueueCompareAndRemoveAllCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueCompareAndRemoveAllCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueCompareAndRemoveAllCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueCompareAndRemoveAllCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueCompareAndRemoveAllCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
+
 
 class QueueCompareAndRetainAllCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_COMPAREANDRETAINALL
@@ -770,13 +813,13 @@ class QueueCompareAndRetainAllCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueCompareAndRetainAllCodec.REQUEST_TYPE
-            name=None
-            dataList=None
-
-    def encodeRequest(self, name, dataList):
+            self.TYPE = QueueCompareAndRetainAllCodec.REQUEST_TYPE
+            self.name=None
+            self.dataList=None
+    @classmethod
+    def encodeRequest(cls, name, dataList):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueCompareAndRetainAllCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueCompareAndRetainAllCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueCompareAndRetainAllCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(dataList.size())
@@ -785,8 +828,8 @@ class QueueCompareAndRetainAllCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueCompareAndRetainAllCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -805,20 +848,22 @@ class QueueCompareAndRetainAllCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueCompareAndRetainAllCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueCompareAndRetainAllCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueCompareAndRetainAllCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueCompareAndRetainAllCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
 
 
@@ -832,19 +877,19 @@ class QueueClearCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueClearCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueClearCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueClearCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueClearCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueClearCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueClearCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -853,13 +898,22 @@ class QueueClearCodec:
 
     '''************************ RESPONSE *************************'''
 
-    def encodeResponse(self):
+    class ResponseParameters:
+        def __init__(self):
+            self.TYPE = QueueClearCodec.RESPONSE_TYPE
+    @classmethod
+    def encodeResponse(cls, ):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueClearCodec.RESPONSE_TYPE)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
-        return None
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
+        parameters=QueueClearCodec.ResponseParameters()
+
+        return parameters
+
+
 
 class QueueAddAllCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_ADDALL
@@ -870,13 +924,13 @@ class QueueAddAllCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueAddAllCodec.REQUEST_TYPE
-            name=None
-            dataList=None
-
-    def encodeRequest(self, name, dataList):
+            self.TYPE = QueueAddAllCodec.REQUEST_TYPE
+            self.name=None
+            self.dataList=None
+    @classmethod
+    def encodeRequest(cls, name, dataList):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueAddAllCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueAddAllCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueAddAllCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(dataList.size())
@@ -885,8 +939,8 @@ class QueueAddAllCodec:
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueAddAllCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -905,21 +959,24 @@ class QueueAddAllCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueAddAllCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueAddAllCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueAddAllCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueAddAllCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
+
 
 class QueueAddListenerCodec:
     REQUEST_TYPE = QueueMessageType.QUEUE_ADDLISTENER
@@ -930,21 +987,21 @@ class QueueAddListenerCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueAddListenerCodec.REQUEST_TYPE
-            name=None
-            includeValue=None
-
-    def encodeRequest(self, name, includeValue):
+            self.TYPE = QueueAddListenerCodec.REQUEST_TYPE
+            self.name=None
+            self.includeValue=None
+    @classmethod
+    def encodeRequest(cls, name, includeValue):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueAddListenerCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueAddListenerCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueAddListenerCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(includeValue)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueAddListenerCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -958,27 +1015,29 @@ class QueueAddListenerCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueAddListenerCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueAddListenerCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueAddListenerCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueAddListenerCodec.ResponseParameters()
         response=None
         response = clientMessage.extractStringFromPayload()
         parameters.response = response
+
         return parameters
 
 
     '''************************ EVENTS *************************'''
 
-
-    def encodeItemEvent(self, item, uuid, eventType):
+    @classmethod
+    def encodeItemEvent(cls,  item, uuid, eventType):
         clientMessage=ClientMessage()
         clientMessage.setOperationType(eventconstant.EVENT_ITEM)
         clientMessage.setEventFlag()
@@ -989,12 +1048,14 @@ class QueueAddListenerCodec:
         else:
             item_isNull= False
             clientMessage.set(item_isNull)
-            clientMessage.set(item)
-            clientMessage.set(uuid)
-            clientMessage.set(eventType)
-            return clientMessage
+        clientMessage.set(item)
+        clientMessage.set(uuid)
+        clientMessage.set(eventType)
+        return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler)
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_ITEM):
@@ -1002,12 +1063,12 @@ class QueueAddListenerCodec:
                 item_isNull = clientMessage.extractBooleanFromPayload()
                 if not item_isNull:
                     item = clientMessage.extractBytesFromPayload()
-                    uuid=None
-                    uuid = clientMessage.extractStringFromPayload()
-                    eventType=None
-                    eventType = clientMessage.extractIntFromPayload()
-                    self.handle(item, uuid, eventType)
-                    return
+                uuid=None
+                uuid = clientMessage.extractStringFromPayload()
+                eventType=None
+                eventType = clientMessage.extractIntFromPayload()
+                self.handler.handle(item, uuid, eventType)
+                return
 
 
 class QueueRemoveListenerCodec:
@@ -1019,21 +1080,21 @@ class QueueRemoveListenerCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueRemoveListenerCodec.REQUEST_TYPE
-            name=None
-            registrationId=None
-
-    def encodeRequest(self, name, registrationId):
+            self.TYPE = QueueRemoveListenerCodec.REQUEST_TYPE
+            self.name=None
+            self.registrationId=None
+    @classmethod
+    def encodeRequest(cls, name, registrationId):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueRemoveListenerCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueRemoveListenerCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueRemoveListenerCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(registrationId)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueRemoveListenerCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -1047,21 +1108,24 @@ class QueueRemoveListenerCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueRemoveListenerCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueRemoveListenerCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueRemoveListenerCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueRemoveListenerCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
+
 
 
 class QueueRemainingCapacityCodec:
@@ -1073,19 +1137,19 @@ class QueueRemainingCapacityCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueRemainingCapacityCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueRemainingCapacityCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueRemainingCapacityCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueRemainingCapacityCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueRemainingCapacityCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueRemainingCapacityCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -1096,20 +1160,22 @@ class QueueRemainingCapacityCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueRemainingCapacityCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueRemainingCapacityCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueRemainingCapacityCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueRemainingCapacityCodec.ResponseParameters()
         response=None
         response = clientMessage.extractIntFromPayload()
         parameters.response = response
+
         return parameters
 
 
@@ -1122,19 +1188,19 @@ class QueueIsEmptyCodec:
 
     class RequestParameters:
         def __init__(self):
-            TYPE = QueueIsEmptyCodec.REQUEST_TYPE
-            name=None
-
-    def encodeRequest(self, name):
+            self.TYPE = QueueIsEmptyCodec.REQUEST_TYPE
+            self.name=None
+    @classmethod
+    def encodeRequest(cls, name):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(QueueIsEmptyCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(QueueIsEmptyCodec.REQUEST_TYPE)
         clientMessage.setRetryable(QueueIsEmptyCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.updateSize()
         return clientMessage
 
-
-    def decodeRequest(self, clientMessage):
+    @classmethod
+    def decodeRequest(cls, clientMessage):
         parameters = QueueIsEmptyCodec.RequestParameters()
         name=None
         name = clientMessage.extractStringFromPayload()
@@ -1145,18 +1211,21 @@ class QueueIsEmptyCodec:
 
     class ResponseParameters:
         def __init__(self):
-            TYPE = QueueIsEmptyCodec.RESPONSE_TYPE
-            response=None
-
-    def encodeResponse(response):
+            self.TYPE = QueueIsEmptyCodec.RESPONSE_TYPE
+            self.response=None
+    @classmethod
+    def encodeResponse(cls, response):
         clientMessage = ClientMessage()
         clientMessage.setOperationType(QueueIsEmptyCodec.RESPONSE_TYPE)
         clientMessage.set(response)
-        return clientMessage
 
-    def decodeResponse(self, clientMessage):
+        return clientMessage
+    @classmethod
+    def decodeResponse(cls, clientMessage):
         parameters=QueueIsEmptyCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
         parameters.response = response
+
         return parameters
+
