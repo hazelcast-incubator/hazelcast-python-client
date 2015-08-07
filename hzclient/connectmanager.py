@@ -31,7 +31,7 @@ class ConnectionManager(object):
         #do submission stuff up here
         mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
         mythread.start()
-        mythread.join(timeout=5000)
+        mythread.join(timeout=500)
 
         if id in self.messages.keys():
             return self.messages[id]
@@ -57,7 +57,7 @@ class HazelConnection(asyncore.dispatcher):
         self.connect((address,port))
         self.manager=manager
         msg=AuthenticationMessage
-        self.writebuffer="CB2PER"+AuthenticationMessage().encodeMessage()
+        self.writebuffer="CB2PHY"+AuthenticationMessage().encodeMessage()
         self.manager.adjustCorrelationId(msg)
         self.readbuffer=[]
         self.receiving=False
@@ -72,6 +72,7 @@ class HazelConnection(asyncore.dispatcher):
     def process_input(self,input):
         clientmsg=ClientMessage.decodeMessage(input)
         if clientmsg.isEvent():
-            self.manager.eventregistry[clientmsg.correlation].handle(clientmsg)
+            mythread=threading.Thread(target=self.manager.eventregistry[clientmsg.correlation].handle,args=(clientmsg,))
+            mythread.start()
         else:
             self.manager.messages[clientmsg.correlation]=input

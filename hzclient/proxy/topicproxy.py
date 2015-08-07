@@ -58,5 +58,5 @@ class TopicProxy(object):
         response=self.connection.getPackageWithCorrelationId(msg.correlation,retryable)
         msg2=ClientMessage.decodeMessage(response)
 
-        self.connection.events.pop(registrationId)
+        self.connection.eventregistry.pop(registrationId)
         return topiccodec.TopicPublishCodec.decodeResponse(msg2)

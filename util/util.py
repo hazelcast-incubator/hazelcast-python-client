@@ -23,10 +23,6 @@ def decodehzstring(byteobject):
     byteobject=byteobject[4:]
     size2=struct.unpack("!h",byteobject[:2])
     byteobject=byteobject[2:]
-    print size == size2
-    if size != size2:
-        print size
-        print size2
+
     mystr=byteobject.decode("UTF8")
-    print len(mystr)
     return mystr

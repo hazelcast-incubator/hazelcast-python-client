@@ -197,11 +197,9 @@ class ClientMessage(object):
         self.payload=self.payload[int2:]
         return bytesobject
     def extractBooleanFromPayload(self):
-        print len(self.payload)
         bool=self.payload[0]
         self.payload=self.payload[1:]
         bool2=struct.unpack_from("<b",bool)[0]
-        print bool2
         if bool2==0:
             return False
         else:

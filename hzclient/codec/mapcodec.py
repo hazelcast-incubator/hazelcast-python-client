@@ -1836,7 +1836,9 @@ class MapAddEntryListenerToKeyWithPredicateCodec:
         clientMessage.set(numberOfAffectedEntries)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_ENTRY):
@@ -1844,26 +1846,26 @@ class MapAddEntryListenerToKeyWithPredicateCodec:
                 key_isNull = clientMessage.extractBooleanFromPayload()
                 if not key_isNull:
                     key = clientMessage.extractBytesFromPayload()
-                    value=None
+                value=None
                 value_isNull = clientMessage.extractBooleanFromPayload()
                 if not value_isNull:
                     value = clientMessage.extractBytesFromPayload()
-                    oldValue=None
+                oldValue=None
                 oldValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not oldValue_isNull:
                     oldValue = clientMessage.extractBytesFromPayload()
-                    mergingValue=None
+                mergingValue=None
                 mergingValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not mergingValue_isNull:
                     mergingValue = clientMessage.extractBytesFromPayload()
-                    eventType=None
-                    eventType = clientMessage.extractIntFromPayload()
-                    uuid=None
-                    uuid = clientMessage.extractStringFromPayload()
-                    numberOfAffectedEntries=None
-                    numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                    self.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
-                    return
+                eventType=None
+                eventType = clientMessage.extractIntFromPayload()
+                uuid=None
+                uuid = clientMessage.extractStringFromPayload()
+                numberOfAffectedEntries=None
+                numberOfAffectedEntries = clientMessage.extractIntFromPayload()
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+                return
 
 
 '''
@@ -1974,7 +1976,9 @@ class MapAddEntryListenerWithPredicateCodec:
         clientMessage.set(numberOfAffectedEntries)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_ENTRY):
@@ -1982,26 +1986,26 @@ class MapAddEntryListenerWithPredicateCodec:
                 key_isNull = clientMessage.extractBooleanFromPayload()
                 if not key_isNull:
                     key = clientMessage.extractBytesFromPayload()
-                    value=None
+                value=None
                 value_isNull = clientMessage.extractBooleanFromPayload()
                 if not value_isNull:
                     value = clientMessage.extractBytesFromPayload()
-                    oldValue=None
+                oldValue=None
                 oldValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not oldValue_isNull:
                     oldValue = clientMessage.extractBytesFromPayload()
-                    mergingValue=None
+                mergingValue=None
                 mergingValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not mergingValue_isNull:
                     mergingValue = clientMessage.extractBytesFromPayload()
-                    eventType=None
-                    eventType = clientMessage.extractIntFromPayload()
-                    uuid=None
-                    uuid = clientMessage.extractStringFromPayload()
-                    numberOfAffectedEntries=None
-                    numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                    self.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
-                    return
+                eventType=None
+                eventType = clientMessage.extractIntFromPayload()
+                uuid=None
+                uuid = clientMessage.extractStringFromPayload()
+                numberOfAffectedEntries=None
+                numberOfAffectedEntries = clientMessage.extractIntFromPayload()
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+                return
 
 
 '''
@@ -2112,33 +2116,36 @@ class MapAddEntryListenerToKeyCodec:
         clientMessage.set(numberOfAffectedEntries)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
+
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
-            if (messageType == com.hazelcast.client.impl.protocol.EventMessageConst.EVENT_ENTRY):
+            if (messageType == eventconstant.EVENT_ENTRY):
                 key=None
-            key_isNull = clientMessage.extractBooleanFromPayload()
-            if not key_isNull:
-                key = clientMessage.extractBytesFromPayload()
+                key_isNull = clientMessage.extractBooleanFromPayload()
+                if not key_isNull:
+                    key = clientMessage.extractBytesFromPayload()
                 value=None
-            value_isNull = clientMessage.extractBooleanFromPayload()
-            if not value_isNull:
-                value = clientMessage.extractBytesFromPayload()
+                value_isNull = clientMessage.extractBooleanFromPayload()
+                if not value_isNull:
+                    value = clientMessage.extractBytesFromPayload()
                 oldValue=None
-            oldValue_isNull = clientMessage.extractBooleanFromPayload()
-            if not oldValue_isNull:
-                oldValue = clientMessage.extractBytesFromPayload()
+                oldValue_isNull = clientMessage.extractBooleanFromPayload()
+                if not oldValue_isNull:
+                    oldValue = clientMessage.extractBytesFromPayload()
                 mergingValue=None
-            mergingValue_isNull = clientMessage.extractBooleanFromPayload()
-            if not mergingValue_isNull:
-                mergingValue = clientMessage.extractBytesFromPayload()
+                mergingValue_isNull = clientMessage.extractBooleanFromPayload()
+                if not mergingValue_isNull:
+                    mergingValue = clientMessage.extractBytesFromPayload()
                 eventType=None
                 eventType = clientMessage.extractIntFromPayload()
                 uuid=None
                 uuid = clientMessage.extractStringFromPayload()
                 numberOfAffectedEntries=None
                 numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                self.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
                 return
 
 '''
@@ -2244,7 +2251,9 @@ class MapAddEntryListenerCodec:
         clientMessage.set(numberOfAffectedEntries)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_ENTRY):
@@ -2252,26 +2261,26 @@ class MapAddEntryListenerCodec:
                 key_isNull = clientMessage.extractBooleanFromPayload()
                 if not key_isNull:
                     key = clientMessage.extractBytesFromPayload()
-                    value=None
+                value=None
                 value_isNull = clientMessage.extractBooleanFromPayload()
                 if not value_isNull:
                     value = clientMessage.extractBytesFromPayload()
-                    oldValue=None
+                oldValue=None
                 oldValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not oldValue_isNull:
                     oldValue = clientMessage.extractBytesFromPayload()
-                    mergingValue=None
+                mergingValue=None
                 mergingValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not mergingValue_isNull:
                     mergingValue = clientMessage.extractBytesFromPayload()
-                    eventType=None
-                    eventType = clientMessage.extractIntFromPayload()
-                    uuid=None
-                    uuid = clientMessage.extractStringFromPayload()
-                    numberOfAffectedEntries=None
-                    numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                    self.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
-                    return
+                eventType=None
+                eventType = clientMessage.extractIntFromPayload()
+                uuid=None
+                uuid = clientMessage.extractStringFromPayload()
+                numberOfAffectedEntries=None
+                numberOfAffectedEntries = clientMessage.extractIntFromPayload()
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+                return
 
 
 '''
@@ -2377,7 +2386,9 @@ class MapAddNearCacheEntryListenerCodec:
         clientMessage.set(numberOfAffectedEntries)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_ENTRY):
@@ -2385,26 +2396,26 @@ class MapAddNearCacheEntryListenerCodec:
                 key_isNull = clientMessage.extractBooleanFromPayload()
                 if not key_isNull:
                     key = clientMessage.extractBytesFromPayload()
-                    value=None
+                value=None
                 value_isNull = clientMessage.extractBooleanFromPayload()
                 if not value_isNull:
                     value = clientMessage.extractBytesFromPayload()
-                    oldValue=None
+                oldValue=None
                 oldValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not oldValue_isNull:
                     oldValue = clientMessage.extractBytesFromPayload()
-                    mergingValue=None
+                mergingValue=None
                 mergingValue_isNull = clientMessage.extractBooleanFromPayload()
                 if not mergingValue_isNull:
                     mergingValue = clientMessage.extractBytesFromPayload()
-                    eventType=None
-                    eventType = clientMessage.extractIntFromPayload()
-                    uuid=None
-                    uuid = clientMessage.extractStringFromPayload()
-                    numberOfAffectedEntries=None
-                    numberOfAffectedEntries = clientMessage.extractIntFromPayload()
-                    self.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
-                    return
+                eventType=None
+                eventType = clientMessage.extractIntFromPayload()
+                uuid=None
+                uuid = clientMessage.extractStringFromPayload()
+                numberOfAffectedEntries=None
+                numberOfAffectedEntries = clientMessage.extractIntFromPayload()
+                self.handler.handle(key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries)
+                return
 
 
 '''
@@ -2532,7 +2543,9 @@ class MapAddPartitionLostListenerCodec:
         clientMessage.set(uuid)
         return clientMessage
 
-    class AbstractEventHandler:
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_MAPPARTITIONLOST):
@@ -2540,7 +2553,7 @@ class MapAddPartitionLostListenerCodec:
                 partitionId = clientMessage.extractIntFromPayload()
                 uuid=None
                 uuid = clientMessage.extractStringFromPayload()
-                self.handle(partitionId, uuid)
+                self.handler.handle(partitionId, uuid)
 
 
 '''
