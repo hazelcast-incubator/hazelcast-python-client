@@ -197,6 +197,7 @@ class ClientMessage(object):
         self.payload=self.payload[int2:]
         return bytesobject
     def extractBooleanFromPayload(self):
+
         bool=self.payload[0]
         self.payload=self.payload[1:]
         bool2=struct.unpack_from("<b",bool)[0]

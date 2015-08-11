@@ -3,7 +3,7 @@ __author__ = 'Jonathan Brodie'
 from hzclient.proxy.topicproxy import TopicProxy
 from hzclient.proxy.proxy import ALongProxy
 from hzclient.proxy.mapproxy import MapProxy
-
+import threading
 
 
 from hzclient.connectmanager import ConnectionManager
@@ -12,11 +12,7 @@ from hzclient.connectmanager import ConnectionManager
 class HazelcastClient(object):
     def __init__(self):
         self.connection=ConnectionManager()
-        response=self.connection.getPackageWithCorrelationId(0,True)
-        if response is not None:
-            print "Connection has been initalized"
-        else:
-            print "None"
+
 
     def getAtomicLong(self,title):
         mylong=ALongProxy(title,self.connection)
@@ -31,3 +27,5 @@ class HazelcastClient(object):
         return mylong
     def step(self):
         print "TO BE IMPLEMENTED"
+
+
