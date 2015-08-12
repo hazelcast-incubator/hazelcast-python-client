@@ -18,7 +18,6 @@ class ConnectionManager(object):
 
         firstConnection=HazelConnection('127.0.0.1',5701,self)
         self.connections.append(firstConnection)
-        asyncore.loop(count=1)
         self.step_thread=threading.Thread(target = self.step)
         self.step_thread.start()
 
@@ -64,10 +63,7 @@ class ConnectionManager(object):
 
             #do event processing
             if len(self.events) > 0:
-                print "shit there are events to process!"
                 while len(self.events) > 0:
-                    print "foo"
-                    print len(self.events)
                     for event in self.events:
                         id=event.correlation
                         for ids in self.eventregistry:
@@ -134,7 +130,7 @@ class ConnectionManager(object):
         while id not in self.messages.keys():
             i=i+1
             self.lock.release()
-            time.sleep(1)
+            time.sleep(1.0)
             self.lock.acquire()
             if iterations != -1 and i > iterations:
                 break

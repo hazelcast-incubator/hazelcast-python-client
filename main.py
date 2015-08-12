@@ -5,6 +5,7 @@ from util import util
 from util import encode
 from hzclient.hazelclient import HazelcastClient
 import messagehandler
+myglobal=0
 class MyEntryHandler():
     def handle(self,key,value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries):
         print numberOfAffectedEntries
