@@ -7,21 +7,27 @@ from clientmessage import ClientMessage
 class ConnectionManager(object):
     def __init__(self,smart=False):
         self.messages={}
+        self.messagelist=[]
         self.proxies=[]
         self.__correlationid__=0
         self.connections=[]
         self.events=[]
         self.eventregistry={}
         self.connected=False
+        self.lock=threading.Lock()
+
         firstConnection=HazelConnection('127.0.0.1',5701,self)
         self.connections.append(firstConnection)
         asyncore.loop(count=1)
-        self.event_thread_flag=threading.Event()
-        self.event_thread=threading.Thread(target= self.event_step)
-        self.event_thread.daemon=True
-        response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
-        self.event_thread.start()
-        if response is not None:
+        self.step_thread=threading.Thread(target = self.step)
+        self.step_thread.start()
+
+        #get the first response from the server
+        initialresponse=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
+
+
+        #if the client is smart, initialize other connections
+        if initialresponse is not None:
             print "Connection has been initalized"
         else:
             print "There was an error connecting to the server!"
@@ -37,54 +43,104 @@ class ConnectionManager(object):
         clientmsg.correlation=self.__correlationid__
         self.__correlationid__ += 1
 
-    def getPackageWithCorrelationId(self,id,retry=False):
 
-        mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
-        mythread.start()
-        mythread.join(timeout=10)
-        print "we didn't make it here did we..."
+    def step(self):
+        """
+        Step function.  This thread is initialized at the beginning
+        :return:
+        """
+        while True:
+            #acquire the lock for the thread
+            self.lock.acquire()
+            self.checkConnections()
+            #do normal message processing
+            if len(self.messagelist) > 0:
+                while len(self.messagelist) > 0:
+                    for message in self.messagelist:
+                        id = ClientMessage.decodeMessage(message).correlation
+                        self.messages[id]=message
+                        self.messagelist.remove(message)
+
+
+            #do event processing
+            if len(self.events) > 0:
+                print "shit there are events to process!"
+                while len(self.events) > 0:
+                    print "foo"
+                    print len(self.events)
+                    for event in self.events:
+                        id=event.correlation
+                        for ids in self.eventregistry:
+                            if id == ids:
+                                self.eventregistry[id].handle(event)
+                                self.events.remove(event)
+                        if event in self.events:
+                            print "ERROR: Could not find registered event handler"
+
+            #if the client is smart, you should do more stuff here
+
+            #release the lock
+            self.lock.release()
+
+    def getPackageWithCorrelationId(self,id,retry=False):
+        """
+        Gets the package with the specified id
+        :param id:
+        :param retry:
+        :return:
+        """
+
+        #first acquire the lock for the manager
+        self.lock.acquire()
+        self.waitForPackageWithCorrelationId(id,iterations=10)
+        returnvalue=None
         if id in self.messages.keys():
-            print "1"
-            return self.messages[id]
+            returnvalue=self.messages[id]
         elif retry:
-            print "2"
-            print id
+
             mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
             mythread.start()
             mythread.join()
-            return self.messages[id]
+            self.waitForPackageWithCorrelationId(id,iterations=-1)
+            returnvalue=self.messages[id]
         else:
             #ping the server to keep the connection alive
-            print "3"
-            return None
+            returnvalue=None
 
-    def waitForPackageWithCorrelationId(self,id):
+        #now that we're done, we can release the lock
+        self.lock.release()
+        return returnvalue
+
+
+
+    def checkConnections(self,n=1):
+        """
+        Runs asyncore loop for n iterations
+        :param n:
+        :return:
+        """
+        asyncore.loop(count=n)
+
+
+
+    def waitForPackageWithCorrelationId(self,id,iterations=-1):
+        """
+        checks if the id has been found, release the lock and sleep to give the step thread time to acquire it, then acquire the lock again
+        :param id:
+        :param iterations: number of time to try.  If this is -1, then it will loop until the id has been found
+        :return:
+        """
+        i=0
         while id not in self.messages.keys():
-            asyncore.loop(count=1)
-
-    def msg_step(self):
-        while True:
-            self.msg_thread_flag.wait()
-            for message in self.messagelist:
-                print "message!"
-                newmsg=ClientMessage.decodeMessage(message)
-                self.messages[newmsg.correlation]=message
-                self.messagelist.remove(message)
-            self.msg_thread_flag.clear()
-
+            i=i+1
+            self.lock.release()
+            time.sleep(1)
+            self.lock.acquire()
+            if iterations != -1 and i > iterations:
+                break
     '''
     method for manager to process events outside of the io thread
     '''
-    def event_step(self):
-        while True:
-            #self.event_thread_flag.wait()
-            for event in self.events:
-                id=event.correlation
-                for ids in self.eventregistry:
-                    if id == ids:
-                        self.eventregistry[id].handle(event)
-                        self.events.remove(event)
-            #self.event_thread_flag.clear()
 
 
 class HazelConnection(asyncore.dispatcher):
@@ -115,12 +171,9 @@ class HazelConnection(asyncore.dispatcher):
 
             currentinput=input[:msgsize]
             currentmsg=ClientMessage.decodeMessage(currentinput)
-            print currentmsg.correlation
             if currentmsg.isEvent():
                 self.manager.events.append(clientmsg)
                     #self.manager.event_thread.start()
             else:
-                self.manager.messages[currentmsg.correlation]=currentinput
-                if len(self.manager.events) == 0:
-                    self.manager.event_thread_flag.clear()
+                self.manager.messagelist.append(currentinput)
             input=input[msgsize:]

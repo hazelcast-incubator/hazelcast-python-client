@@ -3,7 +3,6 @@ __author__ = 'Jonathan Brodie'
 from hzclient.proxy.topicproxy import TopicProxy
 from hzclient.proxy.proxy import ALongProxy
 from hzclient.proxy.mapproxy import MapProxy
-import threading
 
 
 from hzclient.connectmanager import ConnectionManager
@@ -25,7 +24,5 @@ class HazelcastClient(object):
     def getMap(self,title):
         mylong=MapProxy(title,self.connection)
         return mylong
-    def step(self):
-        print "TO BE IMPLEMENTED"
 
 

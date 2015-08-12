@@ -470,10 +470,8 @@ class MapProxy(object):
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
-        print "sending size"
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        print "returning size..."
         return mapcodec.MapSizeCodec.decodeResponse(msg2)
     def SubmitToKey(self,   entryProcessor, key):
         msg=mapcodec.MapSubmitToKeyCodec.encodeRequest( self.title, entryProcessor, key)

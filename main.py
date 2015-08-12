@@ -16,10 +16,9 @@ def main():
     mymap.AddEntryListener(encode.encodeboolean(True), MyEntryHandler())
     while True:
         size=mymap.Size().response
+        print size
         if size > 10:
             break
-        else:
-            print size
     print "we made it!"
     #sys.exit()
 if __name__ == '__main__':
