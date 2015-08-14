@@ -252,6 +252,7 @@ class MapProxy(object):
         msg=mapcodec.MapGetCodec.encodeRequest( self.title, key, threadId)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
+        self.connection.adjustPartitionId(key,msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
@@ -360,6 +361,7 @@ class MapProxy(object):
         msg=mapcodec.MapPutCodec.encodeRequest( self.title, key, value, threadId, ttl)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
+        self.connection.adjustPartitionId(msg,key)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)

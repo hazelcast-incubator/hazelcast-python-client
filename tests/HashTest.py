@@ -5,4 +5,6 @@ import unittest,ctypes
 from util import murmurhash
 class HashTests(unittest.TestCase):
     def testHash(self):
-        print "foo"
+        murmurhash.murmur("fookljfadsjfdsjjkdsfjlgsdijasdgiiadgsiosdgii9wg9i9wipweiopiewiopewop",3,2)
+if __name__ == '__main__':
+    unittest.main()

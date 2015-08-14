@@ -13,22 +13,23 @@ def murmur(key, length, seed):
 
     hash=seed
     delimiter=4
-    splitBytes=[key[i:i+delimiter] for i in range(0,len(key),delimiter)]
-
-    for item in splitBytes:
-        if not (len(item) == 4):
-            break
-        k=item
+    key=bytearray(key)
+    print key
+    while len(key) > 4:
+        item=key[:4]
+        key=key[4:]
+        print item
+        j=struct.pack("!s",item)
+        k=struct.pack("!i",item)
         k=(k << r1) | (k >> (32-r1))
         k=k*c2
         hash=hash ^ k
         hash=(hash << r2) | (hash >> 32-r2)
         hash=hash * m + n
-    lastIndex=len(splitBytes)-1
 
-    if len(splitBytes[lastIndex]) != 4:
+    if len(key) > 0:
 
-        remainingBytes=splitBytes[lastIndex]
+        remainingBytes=key
         endianness=None
         if sys.byteorder is 'big':
             endianness=">"

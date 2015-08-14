@@ -2,6 +2,7 @@ __author__ = 'Jonathan Brodie'
 
 import ctypes,struct
 import encode
+import murmurhash
 
 def raiseNotDefined():
     raise NotImplementedError("This method has not been defined.")
@@ -26,3 +27,15 @@ def decodehzstring(byteobject):
 
     mystr=byteobject.decode("UTF8")
     return mystr
+
+def computepartitionid(partitions,key):
+    largest=-1
+    for i in partitions:
+        if i > largest:
+            largest=i
+    denominator=largest+1
+    numerator=murmurhash.murmur(key,5,2)
+    answer=(numerator % denominator)
+    print "Partition Id: "
+    print answer
+    return answer

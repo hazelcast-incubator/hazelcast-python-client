@@ -1,8 +1,8 @@
 __author__ = 'Jonathan Brodie'
-import asyncore, socket,asynchat,time,threading,struct
+import asyncore, socket,asynchat,time,threading,struct,util.util,util.encode
 from clientmessage import AuthenticationMessage
 from clientmessage import ClientMessage
-
+from hzclient.codec import clientcodec
 
 class ConnectionManager(object):
     def __init__(self,smart=False):
@@ -23,13 +23,39 @@ class ConnectionManager(object):
 
         #get the first response from the server
         initialresponse=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
-
+        msg=ClientMessage.decodeMessage(initialresponse)
+        initialresponse=clientcodec.ClientAuthenticationCodec.decodeResponse(ClientMessage.decodeMessage(initialresponse))
+        self.uuid=initialresponse.uuid
+        self.owneruuid=initialresponse.ownerUuid
 
         #if the client is smart, initialize other connections
         if initialresponse is not None:
             print "Connection has been initalized"
         else:
             print "There was an error connecting to the server!"
+
+        if smart:
+            msg=clientcodec.ClientGetPartitionsCodec.encodeRequest()
+            self.adjustCorrelationId(msg)
+            retryable=msg.retryable
+            correlationid=msg.correlation
+            self.sendPackage(msg.encodeMessage())
+            response=self.getPackageWithCorrelationId(correlationid,retryable)
+            msg2=ClientMessage.decodeMessage(response)
+
+            response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
+            i=1
+
+            for member in response.members:
+                i=i+1
+                memberhost=member.host
+                memberport=member.port
+                if memberhost != "127.0.0.1" and memberport != 5701:
+                    newConnection=HazelConnection(memberhost,memberport,self,first=False)
+                    response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
+                    self.connections.append(newConnection)
+                    if response is not None:
+                        print "Successfully added new connection"
         #else:
             #raise Timeout Exception
 
@@ -42,6 +68,17 @@ class ConnectionManager(object):
         clientmsg.correlation=self.__correlationid__
         self.__correlationid__ += 1
 
+    def adjustPartitionId(self,clientmsg,opkey):
+        msg=clientcodec.ClientGetPartitionsCodec.encodeRequest()
+        self.adjustCorrelationId(msg)
+        retryable=msg.retryable
+        correlationid=msg.correlation
+        self.sendPackage(msg.encodeMessage())
+        response=self.getPackageWithCorrelationId(correlationid,retryable)
+        msg2=ClientMessage.decodeMessage(response)
+        response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
+        newpartition=util.util.computepartitionid(response.index,opkey)
+        clientmsg.partition=newpartition
 
     def step(self):
         """
@@ -101,12 +138,28 @@ class ConnectionManager(object):
             returnvalue=self.messages[id]
         else:
             #ping the server to keep the connection alive
+            mythread=threading.Thread(target=self.ping)
+            mythread.start()
+
             returnvalue=None
 
         #now that we're done, we can release the lock
         self.lock.release()
         return returnvalue
 
+
+    def ping(self):
+        self.lock.acquire()
+        msg=clientcodec.ClientPingCodec.encodeRequest()
+        self.adjustCorrelationId(msg)
+        corrid=msg.correlation
+        self.sendPackage(msg.encodeMessage())
+        response=self.getPackageWithCorrelationId(corrid,False)
+        if response is not None:
+            print "Server responded to ping"
+        else:
+            print "no response"
+        self.lock.release()
 
 
     def checkConnections(self,n=1):
@@ -134,21 +187,23 @@ class ConnectionManager(object):
             self.lock.acquire()
             if iterations != -1 and i > iterations:
                 break
-    '''
-    method for manager to process events outside of the io thread
-    '''
 
 
 class HazelConnection(asyncore.dispatcher):
 
-    def __init__(self,address,port,manager):
+    def __init__(self,address,port,manager,first=True):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
         self.manager=manager
-        self.connect((address,port))
-        msg=AuthenticationMessage()
-        self.manager.adjustCorrelationId(msg)
         self.setblocking(1)
+        username=util.encode.encodestring("dev")
+        password=util.encode.encodestring("dev-pass")
+        if first:
+            msg=clientcodec.ClientAuthenticationCodec.encodeRequest(username,password,None,None,util.encode.encodeboolean(True))
+        else:
+
+            msg=clientcodec.ClientAuthenticationCodec.encodeRequest(username,password,util.encode.encodestring(self.manager.uuid),util.encode.encodestring(self.manager.owneruuid),util.encode.encodeboolean(False))
+        self.manager.adjustCorrelationId(msg)
         self.writebuffer="CB2PHY"+msg.encodeMessage()
         self.connect((address,port))
         self.initialized=False

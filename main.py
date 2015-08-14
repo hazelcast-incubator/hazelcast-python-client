@@ -13,14 +13,13 @@ class MyEntryHandler():
 
 def main():
     client=HazelcastClient()
-    mymap=client.getMap("my-map")
-    mymap.AddEntryListener(encode.encodeboolean(True), MyEntryHandler())
-    while True:
-        size=mymap.Size().response
-        print size
-        if size > 10:
-            break
-    print "we made it!"
-    #sys.exit()
+    set=client.getSet("my-set")
+    testval=util.hzstringbytes("a")
+    boolean=set.Contains(testval)
+    if boolean.response:
+        print "Contains the value!"
+    else:
+        print "Doesn't contain the value"
+    sys.exit()
 if __name__ == '__main__':
     main()
