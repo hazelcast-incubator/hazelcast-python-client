@@ -1,5 +1,5 @@
 __author__ = 'Jonathan Brodie'
-import sys
+import sys,datetime
 
 from util import util
 from util import encode
@@ -11,15 +11,23 @@ class MyEntryHandler():
         print numberOfAffectedEntries
         print "were affected in this event update"
 
+
+def demo1():
+    client=HazelcastClient()
+    list=client.getList("my-list")
+    while list.Size().response > 0:
+        list.RemoveWithIndex(0)
+    print "All items from my-list have been removed"
+
 def main():
     client=HazelcastClient()
-    set=client.getSet("my-set")
-    testval=util.hzstringbytes("a")
-    boolean=set.Contains(testval)
-    if boolean.response:
-        print "Contains the value!"
-    else:
-        print "Doesn't contain the value"
+    set=client.getList("my-list")
+    print "Start time"
+    print datetime.datetime.now()
+    for i in range(100):
+        set.Get(i)
+    print datetime.datetime.now()
+
     sys.exit()
 if __name__ == '__main__':
     main()

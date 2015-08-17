@@ -2,51 +2,37 @@ __author__ = 'Jonathan Brodie'
 
 import struct,sys
 #murmur hash function to determine partition
-#it's important that key is encoded before use
-def murmur(key, length, seed):
-    c1=0xcc9e2d51
-    c2=0x1b873593
-    r1=15
-    r2=13
-    m=5
-    n=0xe6546b64
+def bytes_to_long(bytes):
+    assert len(bytes) == 8
+    return sum((b << (k * 8) for k, b in enumerate(bytes)))
 
-    hash=seed
-    delimiter=4
+def murmur(key, seed=19820125):
+    m=0xc6a4a7935bd1e995
+    r=47
+    MASK=2**64 -1
+    #convert the key to bytes
     key=bytearray(key)
-    print key
-    while len(key) > 4:
-        item=key[:4]
-        key=key[4:]
-        print item
-        j=struct.pack("!s",item)
-        k=struct.pack("!i",item)
-        k=(k << r1) | (k >> (32-r1))
-        k=k*c2
-        hash=hash ^ k
-        hash=(hash << r2) | (hash >> 32-r2)
-        hash=hash * m + n
+    hash=seed ^ ((m * len(key)) & MASK)
 
-    if len(key) > 0:
 
-        remainingBytes=key
-        endianness=None
-        if sys.byteorder is 'big':
-            endianness=">"
-        else:
-            endianness="<"
-        remainingBytes=struct.unpack(endianness+"%dC" % len(remainingBytes),remainingBytes)
-        remainingBytes=remainingBytes*c1
-        remainingBytes=(remainingBytes << r1) | (remainingBytes >> (32 - r1))
-        remainingBytes=remainingBytes * c2
-        hash=hash ^ remainingBytes
 
-    hash=hash ^ length
+    offset=len(key)/8*8
+    for i in range(0,offset,8):
+        currentbyte=key[i:i+8]
+        num=bytes_to_long(currentbyte)
+        num=(num*m) & MASK
+        num=num^ ((num>> r) & MASK)
+        num=(num*m)&MASK
+        hash=(hash^num)
+        hash=(hash^m) & MASK
 
-    hash=hash ^ (hash >> 16)
-    hash=hash*0x85ebca6b
-    hash=hash ^ (hash >> 13)
-    hash=hash*0xc2b2ae35
-    hash=hash ^ (hash >> 16)
+    remainder=len(key) & 7
+    if remainder > 0:
+
+        hash=hash ^ (key[offset+remainder-1] << ((remainder-1)*8))
+
+    hash=hash ^ ((hash >> r) & MASK)
+    hash=(hash * m) & MASK
+    hash=hash ^ ((hash >> r) & MASK)
 
     return hash

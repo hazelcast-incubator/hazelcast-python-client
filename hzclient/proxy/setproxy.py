@@ -9,7 +9,7 @@ class SetProxy(object):
         self.connection=connfamily
         firstpack=proxycodec.createProxy(self.title, "hz:impl:setService")
         self.connection.adjustCorrelationId(firstpack)
-        self.connection.sendPackage(firstpack.encodeMessage())
+        self.connection.sendPackage(firstpack)
         response=self.connection.getPackageWithCorrelationId(firstpack.correlation,True)
         if response is not None:
             "Set proxy initialized"
@@ -83,15 +83,16 @@ class SetProxy(object):
         """
         Check if value is in the set
         :param value: value to check
-        :return:
+        :return: boolean true or false
         """
         msg=setcodec.SetContainsCodec.encodeRequest( self.title, value)
         retryable=msg.retryable
+        self.connection.adjustPartitionId(msg,"a")
         self.connection.adjustCorrelationId(msg)
-        self.connection.adjustPartitionId(msg,value)
         correlationid=msg.correlation
-        self.connection.sendPackage(msg.encodeMessage())
-        response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
+        self.connection.sendPackage(msg)
+        print msg.partition
+        response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetContainsCodec.decodeResponse(msg2)
     def GetAll(self,  ):

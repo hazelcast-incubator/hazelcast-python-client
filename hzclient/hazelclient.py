@@ -4,6 +4,7 @@ from hzclient.proxy.topicproxy import TopicProxy
 from hzclient.proxy.proxy import ALongProxy
 from hzclient.proxy.mapproxy import MapProxy
 from hzclient.proxy.setproxy import SetProxy
+from hzclient.proxy.listproxy import ListProxy
 
 
 from hzclient.connectmanager import ConnectionManager
@@ -28,5 +29,8 @@ class HazelcastClient(object):
     def getSet(self,title):
         set=SetProxy(title,self.connection)
         return set
+    def getList(self,title):
+        list=ListProxy(title,self.connection)
+        return list
 
 

@@ -1,20 +1,28 @@
 __author__ = 'Jonathan Brodie'
 import asyncore, socket,asynchat,time,threading,struct,util.util,util.encode
+
 from clientmessage import AuthenticationMessage
 from clientmessage import ClientMessage
 from hzclient.codec import clientcodec
 
 class ConnectionManager(object):
     def __init__(self,smart=False):
+        self.smart=smart
         self.messages={}
+        self.corr_conn={}
         self.messagelist=[]
         self.proxies=[]
         self.__correlationid__=0
         self.connections=[]
+
+
+
         self.events=[]
         self.eventregistry={}
-        self.connected=False
+
+
         self.lock=threading.Lock()
+        self.partitiontable=None
 
         firstConnection=HazelConnection('127.0.0.1',5701,self)
         self.connections.append(firstConnection)
@@ -22,8 +30,8 @@ class ConnectionManager(object):
         self.step_thread.start()
 
         #get the first response from the server
+
         initialresponse=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
-        msg=ClientMessage.decodeMessage(initialresponse)
         initialresponse=clientcodec.ClientAuthenticationCodec.decodeResponse(ClientMessage.decodeMessage(initialresponse))
         self.uuid=initialresponse.uuid
         self.owneruuid=initialresponse.ownerUuid
@@ -39,30 +47,68 @@ class ConnectionManager(object):
             self.adjustCorrelationId(msg)
             retryable=msg.retryable
             correlationid=msg.correlation
-            self.sendPackage(msg.encodeMessage())
+            self.sendPackage(msg)
             response=self.getPackageWithCorrelationId(correlationid,retryable)
             msg2=ClientMessage.decodeMessage(response)
 
             response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
-            i=1
-
+            print response.members
+            print response.index
             for member in response.members:
-                i=i+1
                 memberhost=member.host
                 memberport=member.port
                 if memberhost != "127.0.0.1" and memberport != 5701:
                     newConnection=HazelConnection(memberhost,memberport,self,first=False)
-                    response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
                     self.connections.append(newConnection)
+                    response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
+                    print clientcodec.ClientAuthenticationCodec.decodeResponse(ClientMessage.decodeMessage(response)).address.port
                     if response is not None:
                         print "Successfully added new connection"
         #else:
             #raise Timeout Exception
 
-    def sendPackage(self, binarypackage):
-        #do logic in determining which connection to use to send the package, for now use a dumb for loop
-        for i in self.connections:
-            i.send(binarypackage)
+    def sendPackage(self, clientmsg):
+        """
+
+        :param clientmsg: client message to send, unencoded
+        :return: connection that was used to send the message.  This isn't needed unless we want to test a connection to a node.
+        """
+        sent=False
+        corr=clientmsg.correlation
+        conn=None
+        if self.partitiontable is not None and clientmsg.partition >= 0 and self.smart:
+            for i in range(len(self.connections)):
+                if i == self.partitiontable[clientmsg.partition]:
+                    print self.connections[i],self.connections
+                    self.connections[i].send(clientmsg.encodeMessage())
+                    conn=self.connections[i]
+                    print "we sent it!"
+                    sent=True
+        else:
+            print "here?"
+            for connection in self.connections:
+                if not sent:
+                    conn=connection
+                    connection.send(clientmsg.encodeMessage())
+                    sent=True
+        if not sent:
+            print "ERROR: Could not submit to appropriate member! redelegating..."
+            for connection in self.connections:
+                if not sent:
+                    conn=connection
+                    connection.send(clientmsg.encodeMessage())
+                    sent=True
+        self.corr_conn[corr]=conn
+        return conn
+    def sendPackageOnAllConnections(self,clientmsg):
+        for connection in self.connections:
+            connection.send(clientmsg.encodeMessage())
+
+    def sendPackageOnConnection(self,clientmsg,connection):
+        for conn in self.connections:
+            if conn == connection:
+                connection.send(clientmsg.encodeMessage())
+                self.corr_conn[clientmsg.correlation]=conn
 
     def adjustCorrelationId(self,clientmsg):
         clientmsg.correlation=self.__correlationid__
@@ -73,11 +119,15 @@ class ConnectionManager(object):
         self.adjustCorrelationId(msg)
         retryable=msg.retryable
         correlationid=msg.correlation
-        self.sendPackage(msg.encodeMessage())
+        self.sendPackage(msg)
         response=self.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
+
+
         newpartition=util.util.computepartitionid(response.index,opkey)
+        self.partitiontable=response.index
+        print self.partitiontable
         clientmsg.partition=newpartition
 
     def step(self):
@@ -112,6 +162,8 @@ class ConnectionManager(object):
 
             #if the client is smart, you should do more stuff here
 
+
+
             #release the lock
             self.lock.release()
 
@@ -120,46 +172,64 @@ class ConnectionManager(object):
         Gets the package with the specified id
         :param id:
         :param retry:
-        :return:
+        :return: the response package with the correlationid id
         """
 
         #first acquire the lock for the manager
         self.lock.acquire()
         self.waitForPackageWithCorrelationId(id,iterations=10)
         returnvalue=None
+        print "uh"
         if id in self.messages.keys():
             returnvalue=self.messages[id]
         elif retry:
-
-            mythread=threading.Thread(target=self.waitForPackageWithCorrelationId,args=(id,))
-            mythread.start()
-            mythread.join()
             self.waitForPackageWithCorrelationId(id,iterations=-1)
             returnvalue=self.messages[id]
-        else:
-            #ping the server to keep the connection alive
-            mythread=threading.Thread(target=self.ping)
-            mythread.start()
 
-            returnvalue=None
+        if returnvalue is None:
+            #ping the server to keep the connection alive
+            alive=self.ping(self.corr_conn[id])
+
+            #check if the ping wasn't successful
+            if not alive:
+                self.removeconnection(self.corr_conn[id])
+                print "The connection seems to be dead..."
 
         #now that we're done, we can release the lock
         self.lock.release()
         return returnvalue
 
 
-    def ping(self):
+    def ping(self,connection):
+        """
+
+        :return: boolean - whether or not the server responded to ping
+        """
+        bool=None
         self.lock.acquire()
         msg=clientcodec.ClientPingCodec.encodeRequest()
         self.adjustCorrelationId(msg)
         corrid=msg.correlation
-        self.sendPackage(msg.encodeMessage())
-        response=self.getPackageWithCorrelationId(corrid,False)
+        self.sendPackageOnConnection(msg,connection)
+        response=self.getPackageWithCorrelationId(corrid,True)
         if response is not None:
-            print "Server responded to ping"
+            bool=True
         else:
-            print "no response"
+            bool=False
         self.lock.release()
+        return bool
+
+    def removeconnection(self,conn):
+        """
+        removes the connection conn and any mappings from correlation id to the connection
+        :param conn:
+        :return:
+        """
+        self.connections.remove(conn)
+        for correlationid, connection in self.corr_conn.items():
+            if connection == conn:
+                self.corr_conn.pop([correlationid])
+
 
 
     def checkConnections(self,n=1):
@@ -170,21 +240,21 @@ class ConnectionManager(object):
         """
         asyncore.loop(count=n)
 
-
-
     def waitForPackageWithCorrelationId(self,id,iterations=-1):
         """
         checks if the id has been found, release the lock and sleep to give the step thread time to acquire it, then acquire the lock again
         :param id:
         :param iterations: number of time to try.  If this is -1, then it will loop until the id has been found
-        :return:
+        :return: none
         """
         i=0
         while id not in self.messages.keys():
             i=i+1
+            print i
             self.lock.release()
             time.sleep(1.0)
             self.lock.acquire()
+            print "here?"
             if iterations != -1 and i > iterations:
                 break
 
@@ -195,13 +265,13 @@ class HazelConnection(asyncore.dispatcher):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
         self.manager=manager
+
         self.setblocking(1)
         username=util.encode.encodestring("dev")
         password=util.encode.encodestring("dev-pass")
         if first:
             msg=clientcodec.ClientAuthenticationCodec.encodeRequest(username,password,None,None,util.encode.encodeboolean(True))
         else:
-
             msg=clientcodec.ClientAuthenticationCodec.encodeRequest(username,password,util.encode.encodestring(self.manager.uuid),util.encode.encodestring(self.manager.owneruuid),util.encode.encodeboolean(False))
         self.manager.adjustCorrelationId(msg)
         self.writebuffer="CB2PHY"+msg.encodeMessage()
@@ -213,8 +283,11 @@ class HazelConnection(asyncore.dispatcher):
         self.writebuffer=""
 
     def handle_read(self):
+        print "handle reading!"
         data=self.recv(2048)
         self.process_input(data)
+
+
     def process_input(self,input):
         while len(input) > 0:
             clientmsg=ClientMessage.decodeMessage(input)

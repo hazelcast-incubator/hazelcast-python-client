@@ -34,8 +34,7 @@ def computepartitionid(partitions,key):
         if i > largest:
             largest=i
     denominator=largest+1
-    numerator=murmurhash.murmur(key,5,2)
+    numerator=murmurhash.murmur(key)
     answer=(numerator % denominator)
-    print "Partition Id: "
-    print answer
+
     return answer

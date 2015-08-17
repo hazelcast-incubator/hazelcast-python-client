@@ -70,6 +70,7 @@ class ClientAuthenticationCodec:
 
             clientMessage.set(ownerUuid_isNull)
             clientMessage.set(ownerUuid)
+
         clientMessage.set(isOwnerConnection)
         clientMessage.updateSize()
         return clientMessage
