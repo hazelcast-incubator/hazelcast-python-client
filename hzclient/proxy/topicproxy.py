@@ -12,24 +12,22 @@ class TopicProxy(object):
         self.connection=connfamily
         firstpack=proxycodec.createProxy(self.title,"hz:impl:topicService")
         self.connection.adjustCorrelationId(firstpack)
-        self.connection.sendPackage(firstpack.encodeMessage())
+        self.connection.sendPackage(firstpack)
         response=self.connection.getPackageWithCorrelationId(firstpack.correlation,False)
         newresponse=ClientMessage.decodeMessage(response)
-        print newresponse.payload
         if response is not None:
             print "Initialized and connected proxy!"
         else:
             print "Unable to connect to server."
-        print datetime.datetime.now()
 
     def publish(self,data):
         msg=topiccodec.TopicPublishCodec.encodeRequest(encode.encodestring(self.title),data)
-        msg.partition=1
+        self.connection.adjustPartitionId(msg, data)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
-        self.connection.sendPackage(msg.encodeMessage())
-        response=self.connection.getPackageWithCorrelationId(correlationid,True)
+        self.connection.sendPackage(msg)
+        response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
 
         return topiccodec.TopicPublishCodec.decodeResponse(msg2)

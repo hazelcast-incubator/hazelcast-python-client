@@ -11,6 +11,7 @@ class ConnectionManager(object):
         self.messages={}
         self.corr_conn={}
         self.messagelist=[]
+        self.deadconnections=[]
         self.proxies=[]
         self.__correlationid__=0
         self.connections=[]
@@ -85,7 +86,6 @@ class ConnectionManager(object):
                     print "we sent it!"
                     sent=True
         else:
-            print "here?"
             for connection in self.connections:
                 if not sent:
                     conn=connection
@@ -162,7 +162,13 @@ class ConnectionManager(object):
 
             #if the client is smart, you should do more stuff here
 
+            if self.deadconnections:
+                for connection in self.deadconnections:
+                    self.removeconnection(connection)
 
+
+            if not self.connections:
+                self.noconnections()
 
             #release the lock
             self.lock.release()
@@ -177,28 +183,37 @@ class ConnectionManager(object):
 
         #first acquire the lock for the manager
         self.lock.acquire()
-        self.waitForPackageWithCorrelationId(id,iterations=10)
+        self.waitForPackageWithCorrelationId(id,iterations=20)
         returnvalue=None
-        print "uh"
         if id in self.messages.keys():
             returnvalue=self.messages[id]
         elif retry:
-            self.waitForPackageWithCorrelationId(id,iterations=-1)
+            self.waitForPackageWithCorrelationId(id,iterations=50)
             returnvalue=self.messages[id]
 
+
+
+        #now that we're done, we can release the lock
+        self.lock.release()
         if returnvalue is None:
-            #ping the server to keep the connection alive
+        #ping the server to keep the connection alive
+            print "Yeah something seriously went wrong"
             alive=self.ping(self.corr_conn[id])
 
             #check if the ping wasn't successful
             if not alive:
-                self.removeconnection(self.corr_conn[id])
+                self.deadconnections.append(self.corr_conn[id])
                 print "The connection seems to be dead..."
 
-        #now that we're done, we can release the lock
-        self.lock.release()
         return returnvalue
 
+
+    def noconnections(self):
+        """
+        Raises an exception and quits
+        :return: nothing
+        """
+        raise ValueError("ERROR: NO CONNECTIONS TO CLUSTER FOUND.  SHUTTING DOWN")
 
     def ping(self,connection):
         """
@@ -206,17 +221,23 @@ class ConnectionManager(object):
         :return: boolean - whether or not the server responded to ping
         """
         bool=None
-        self.lock.acquire()
         msg=clientcodec.ClientPingCodec.encodeRequest()
         self.adjustCorrelationId(msg)
         corrid=msg.correlation
         self.sendPackageOnConnection(msg,connection)
-        response=self.getPackageWithCorrelationId(corrid,True)
-        if response is not None:
+
+        self.lock.acquire()
+        self.waitForPackageWithCorrelationId(corrid,iterations=50)
+        returnvalue=None
+        if corrid in self.messages.keys():
+            returnvalue=self.messages[corrid]
+        self.lock.release()
+        if returnvalue is not None:
             bool=True
         else:
             bool=False
-        self.lock.release()
+
+
         return bool
 
     def removeconnection(self,conn):
@@ -225,10 +246,13 @@ class ConnectionManager(object):
         :param conn:
         :return:
         """
+        print self.connections
+        print conn
         self.connections.remove(conn)
+        print "SUCCESS"
         for correlationid, connection in self.corr_conn.items():
             if connection == conn:
-                self.corr_conn.pop([correlationid])
+                self.corr_conn.pop(correlationid)
 
 
 
@@ -239,6 +263,7 @@ class ConnectionManager(object):
         :return:
         """
         asyncore.loop(count=n)
+
 
     def waitForPackageWithCorrelationId(self,id,iterations=-1):
         """
@@ -251,10 +276,10 @@ class ConnectionManager(object):
         while id not in self.messages.keys():
             i=i+1
             print i
+            print self.connections
             self.lock.release()
-            time.sleep(1.0)
+            time.sleep(0.1)
             self.lock.acquire()
-            print "here?"
             if iterations != -1 and i > iterations:
                 break
 
@@ -265,7 +290,6 @@ class HazelConnection(asyncore.dispatcher):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
         self.manager=manager
-
         self.setblocking(1)
         username=util.encode.encodestring("dev")
         password=util.encode.encodestring("dev-pass")
@@ -283,7 +307,6 @@ class HazelConnection(asyncore.dispatcher):
         self.writebuffer=""
 
     def handle_read(self):
-        print "handle reading!"
         data=self.recv(2048)
         self.process_input(data)
 

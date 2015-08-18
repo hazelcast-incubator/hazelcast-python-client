@@ -8,7 +8,7 @@ class MapProxy(object):
         self.title=title
         self.connection=connfamily
         firstpack=proxycodec.createProxy(self.title, "hz:impl:mapService")
-        self.connection.sendPackage(firstpack.encodeMessage())
+        self.connection.sendPackage(firstpack)
         response=self.connection.getPackageWithCorrelationId(firstpack.correlation,True)
         newresponse=ClientMessage.decodeMessage(response)
         print newresponse.payload
@@ -18,11 +18,11 @@ class MapProxy(object):
             print "Unable to connect to server."
 
     def AddEntryListener(self,   includeValue, eventhandler):
-        msg=mapcodec.MapAddEntryListenerCodec.encodeRequest( encode.encodestring(self.title), includeValue)
+        msg=mapcodec.MapAddEntryListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(includeValue))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
-        self.connection.sendPackage(msg.encodeMessage())
+        self.connection.sendPackage(msg)
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddEntryListenerCodec.EventHandler(eventhandler)
@@ -471,7 +471,7 @@ class MapProxy(object):
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
-        self.connection.sendPackage(msg.encodeMessage())
+        self.connection.sendPackage(msg)
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         return mapcodec.MapSizeCodec.decodeResponse(msg2)

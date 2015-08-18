@@ -194,8 +194,9 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListRemoveListenerCodec.decodeResponse(msg2)
     def RemoveWithIndex(self,   index):
-        msg=listcodec.ListRemoveWithIndexCodec.encodeRequest( self.title, index)
+        msg=listcodec.ListRemoveWithIndexCodec.encodeRequest( encode.encodestring(self.title), encode.encodeint32(index))
         retryable=msg.retryable
+        self.connection.adjustPartitionId(msg,index)
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg)
@@ -212,8 +213,9 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListSetCodec.decodeResponse(msg2)
     def Size(self,  ):
-        msg=listcodec.ListSizeCodec.encodeRequest( self.title)
+        msg=listcodec.ListSizeCodec.encodeRequest(encode.encodestring(self.title))
         retryable=msg.retryable
+        self.connection.adjustPartitionId(msg,self.title)
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg)
