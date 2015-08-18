@@ -53,8 +53,7 @@ class ConnectionManager(object):
             msg2=ClientMessage.decodeMessage(response)
 
             response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
-            print response.members
-            print response.index
+
             for member in response.members:
                 memberhost=member.host
                 memberport=member.port
@@ -62,11 +61,11 @@ class ConnectionManager(object):
                     newConnection=HazelConnection(memberhost,memberport,self,first=False)
                     self.connections.append(newConnection)
                     response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
-                    print clientcodec.ClientAuthenticationCodec.decodeResponse(ClientMessage.decodeMessage(response)).address.port
                     if response is not None:
                         print "Successfully added new connection"
         #else:
             #raise Timeout Exception
+
 
     def sendPackage(self, clientmsg):
         """
@@ -80,10 +79,8 @@ class ConnectionManager(object):
         if self.partitiontable is not None and clientmsg.partition >= 0 and self.smart:
             for i in range(len(self.connections)):
                 if i == self.partitiontable[clientmsg.partition]:
-                    print self.connections[i],self.connections
                     self.connections[i].send(clientmsg.encodeMessage())
                     conn=self.connections[i]
-                    print "we sent it!"
                     sent=True
         else:
             for connection in self.connections:
@@ -99,6 +96,7 @@ class ConnectionManager(object):
                     connection.send(clientmsg.encodeMessage())
                     sent=True
         self.corr_conn[corr]=conn
+        self.timer=0
         return conn
     def sendPackageOnAllConnections(self,clientmsg):
         for connection in self.connections:
@@ -127,14 +125,27 @@ class ConnectionManager(object):
 
         newpartition=util.util.computepartitionid(response.index,opkey)
         self.partitiontable=response.index
-        print self.partitiontable
         clientmsg.partition=newpartition
+
+    def ping_timer(self):
+        while True:
+            self.lock.acquire()
+            self.timer=self.timer+1
+
+            if self.timer >= 200:
+                for connection in self.connections:
+                    if not self.ping(connection):
+                        self.removeconnection(connection)
+            self.lock.release()
+            time.sleep(1.0)
 
     def step(self):
         """
-        Step function.  This thread is initialized at the beginning
+        Step function.  This thread is initialized at the beginning.
+        Every 200 steps, ping the server.
         :return:
         """
+        i=0
         while True:
             #acquire the lock for the thread
             self.lock.acquire()
@@ -189,15 +200,15 @@ class ConnectionManager(object):
             returnvalue=self.messages[id]
         elif retry:
             self.waitForPackageWithCorrelationId(id,iterations=50)
-            returnvalue=self.messages[id]
+            if id in self.messages.keys():
+                returnvalue=self.messages[id]
 
 
 
         #now that we're done, we can release the lock
         self.lock.release()
         if returnvalue is None:
-        #ping the server to keep the connection alive
-            print "Yeah something seriously went wrong"
+            #ping the server to keep the connection alive
             alive=self.ping(self.corr_conn[id])
 
             #check if the ping wasn't successful
@@ -246,8 +257,7 @@ class ConnectionManager(object):
         :param conn:
         :return:
         """
-        print self.connections
-        print conn
+
         self.connections.remove(conn)
         print "SUCCESS"
         for correlationid, connection in self.corr_conn.items():
@@ -275,14 +285,11 @@ class ConnectionManager(object):
         i=0
         while id not in self.messages.keys():
             i=i+1
-            print i
-            print self.connections
             self.lock.release()
             time.sleep(0.1)
             self.lock.acquire()
             if iterations != -1 and i > iterations:
                 break
-
 
 class HazelConnection(asyncore.dispatcher):
 

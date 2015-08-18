@@ -11,7 +11,6 @@ class MapProxy(object):
         self.connection.sendPackage(firstpack)
         response=self.connection.getPackageWithCorrelationId(firstpack.correlation,True)
         newresponse=ClientMessage.decodeMessage(response)
-        print newresponse.payload
         if response is not None:
             print "Initialized and connected proxy!"
         else:

@@ -5,13 +5,15 @@ from util import util
 from util import encode
 from hzclient.hazelclient import HazelcastClient
 import messagehandler
-myglobal=0
+
+
 class MyEntryHandler():
+    def __init__(self):
+        self.count=0
     def handle(self, key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries):
-        if mergingValue != oldValue:
-            print "Value in map has been replaced!"
-        print numberOfAffectedEntries
-        print "were affected in this event update"
+
+        print str(numberOfAffectedEntries)+" were affected in this event update"
+
 
 
 def demo1():
@@ -45,7 +47,6 @@ def demo4():
     list=client.getList("my-list")
 
     while list.Size().response < 20:
-        print "kotor 2 m4-78"
         time.sleep(0.5)
 
 def main():
@@ -59,4 +60,4 @@ def main():
 
     sys.exit()
 if __name__ == '__main__':
-    demo1()
+    demo3()
