@@ -11,8 +11,8 @@ from hzclient.connectmanager import ConnectionManager
 
 
 class HazelcastClient(object):
-    def __init__(self):
-        self.connection=ConnectionManager(smart=False)
+    def __init__(self,config):
+        self.connection=ConnectionManager(config,smart=True)
 
 
     def getAtomicLong(self,title):

@@ -4,6 +4,7 @@ import sys,datetime,time
 from util import util
 from util import encode
 from hzclient.hazelclient import HazelcastClient
+from hzclient.config import Config
 import messagehandler
 
 
@@ -11,26 +12,35 @@ class MyEntryHandler():
     def __init__(self):
         self.count=0
     def handle(self, key, value, oldValue, mergingValue, eventType, uuid, numberOfAffectedEntries):
-
         print str(numberOfAffectedEntries)+" were affected in this event update"
 
 
 
 def demo1():
-    client=HazelcastClient()
+    config=Config()
+    config.set_username("dev")
+    config.set_password("dev-pass")
+    client=HazelcastClient(config)
     list=client.getList("my-list")
+    i=0
     while list.Size().response > 0:
         list.RemoveWithIndex(0)
     print "All items from my-list have been removed"
     sys.exit()
 def demo2():
-    client=HazelcastClient()
+    config=Config()
+    config.set_username("dev")
+    config.set_password("dev-pass")
+    client=HazelcastClient(config)
     topic=client.getTopic("my-topic")
     string="Alert published by a Python client!"
     topic.publish(util.hzstringbytes(string))
     sys.exit()
 def demo3():
-    client=HazelcastClient()
+    config=Config()
+    config.set_username("dev")
+    config.set_password("dev-pass")
+    client=HazelcastClient(config)
     map=client.getMap("my-map")
     registrationId=map.AddEntryListener(True,MyEntryHandler()).response
 
@@ -50,14 +60,19 @@ def demo4():
         time.sleep(0.5)
 
 def main():
-    client=HazelcastClient()
+    config=Config()
+    config.set_username("dev")
+    config.set_password("dev-pass")
+    client=HazelcastClient(config)
     set=client.getList("my-list")
     print "Start time"
     print datetime.datetime.now()
     for i in range(100):
+        print i
         set.Get(i)
+    print "finish"
     print datetime.datetime.now()
 
     sys.exit()
 if __name__ == '__main__':
-    demo3()
+    main()

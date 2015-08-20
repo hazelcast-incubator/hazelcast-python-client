@@ -203,6 +203,7 @@ class ListProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListRemoveWithIndexCodec.decodeResponse(msg2)
+
     def Set(self,   index, value):
         msg=listcodec.ListSetCodec.encodeRequest( self.title, index, value)
         retryable=msg.retryable
