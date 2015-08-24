@@ -10,6 +10,7 @@ class ConnectionManager(object):
         self.config=config
         self.smart=smart
         self.messages={}
+        self.sentmessages={}
         self.corr_conn={}
         self.messagelist=[]
         self.deadconnections=[]
@@ -22,13 +23,7 @@ class ConnectionManager(object):
 
         self.events=[]
         self.eventregistry={}
-
-        self.packageflag=threading.Lock()
-        self.messageflag=threading.Event()
-
-
         self.partitiontable=None
-
         firstConnection=HazelConnection('192.168.1.186',5701,self)
         self.connections.append(firstConnection)
 
@@ -62,27 +57,24 @@ class ConnectionManager(object):
             response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
 
             self.updatePartitionTable(response.index)
-            members=response.members
+            self.updateMemberList(response.members)
 
-            for member in members:
-                memberhost=member.host
-                memberport=member.port
-                if memberhost != "127.0.0.1" and memberport != 5701:
-                    newConnection=HazelConnection(memberhost,memberport,self,first=False)
-                    self.connections.append(newConnection)
-                    response=self.getPackageWithCorrelationId(self.__correlationid__-1,True)
-                    if response is not None:
-                        print "Successfully added new connection"
         #else:
             #raise Timeout Exception
         self.eventthreadflag=threading.Event()
         self.event_thread=threading.Thread(target= self.eventloop)
         self.event_thread.start()
 
+    def addConnection(self,host, port):
+        newconnection=HazelConnection(host,port,self,first=False)
+        correlationid=newconnection.initmessage.correlation
+        response=self.getPackageWithCorrelationId(correlationid,True)
+        if response is not None:
+            print "Successfully added new connection"
+            self.connections.append(newconnection)
 
     def sendPackage(self, clientmsg):
         """
-
         :param clientmsg: client message to send, unencoded
         :return: connection that was used to send the message.  This isn't needed unless we want to test a connection to a node.
         """
@@ -106,32 +98,71 @@ class ConnectionManager(object):
             for connection in self.connections:
                 if not sent:
                     self.sendPackageOnConnection(clientmsg,connection)
-
     def sendPackageOnConnection(self,clientmsg,conn):
         self.messagesignal[clientmsg.correlation]=threading.Event()
+        self.sentmessages[clientmsg.correlation]=clientmsg
         conn.sendmsg(clientmsg.encodeMessage())
         self.corr_conn[clientmsg.correlation]=conn
 
     def updateMemberList(self,memberlist):
+        """
+        This runs in O(n^2), which my algorithms professor would hate me for, but isn't that bad given that a cluster is
+        unlikely to have more than like 100 members
+        :param memberlist: memberlist to compare against
+        :return:
+        """
+        #non-smart connections need not apply
+        if not self.smart:
+            return
+        currentlist=self.connections
+
+        #connections that we have but the cluster doesn't - aka dead connections
+        deletelist=[]
+
+        #given the member list, distinguish live and dead connections we have
+        for connection in currentlist:
+            connectionfound=False
+            for member in memberlist:
+                if member.port == connection.memberport and connection.memberaddress == member.host:
+                    connectionfound=True
+            if not connectionfound:
+                deletelist.append(connection)
+
+
+        #now iterate the other way to determine if the member has nodes we don't
+        newmembers=[]
+        for member in memberlist:
+            memberfound=False
+            for connection in currentlist:
+                if member.port == connection.memberport and connection.memberaddress == member.host:
+                    memberfound=True
+            if not memberfound:
+                newmembers.append(member)
+
+
+        #now clear out the dead connections
+        if deletelist:
+            for connection in deletelist:
+                self.removeconnection(connection)
+        #add any new live connections
+        if newmembers:
+            for member in newmembers:
+                self.addConnection(member.host,member.port)
+
+        #Finally, sort our connection list so it's sorted the same way the member list is
         newlist=[]
         for member in memberlist:
-            memberport=member.port
-            memberaddress=member.host
-            for connection in self.connections:
-                if connection.memberport==member.port and connection.memberaddress==memberaddress:
+            for connection in currentlist:
+                if member.port == connection.memberport and connection.memberaddress == member.host:
                     newlist.append(connection)
-                    break
 
         self.connections=newlist
-
-
     def updatePartitionTable(self,partitiontable):
         self.partitiontable=partitiontable
 
     def adjustCorrelationId(self,clientmsg):
         clientmsg.correlation=self.__correlationid__
         self.__correlationid__ += 1
-
     def adjustPartitionId(self,clientmsg,opkey):
         msg=clientcodec.ClientGetPartitionsCodec.encodeRequest()
         self.adjustCorrelationId(msg)
@@ -145,18 +176,9 @@ class ConnectionManager(object):
         response=clientcodec.ClientGetPartitionsCodec.decodeResponse(msg2)
 
         newpartition=util.util.computepartitionid(response.index,opkey)
-        for member in response.members:
-            print member.host
-            print member.port
-
+        clientmsg.partition=newpartition
         self.updatePartitionTable(response.index)
         self.updateMemberList(response.members)
-        print self.partitiontable
-        print self.connections
-        clientmsg.partition=newpartition
-
-
-
 
     def check_connections(self,timeout=15.0,use_poll=False):
         """
@@ -173,7 +195,6 @@ class ConnectionManager(object):
         else:
             poll_fun = asyncore.poll
         poll_fun(timeout,map)
-
     def ioloop(self):
         while True:
             self.check_connections()
@@ -182,7 +203,6 @@ class ConnectionManager(object):
                     self.removeconnection(connection)
             if not self.connections:
                 self.noconnections()
-
     def eventloop(self):
         while True:
             self.eventthreadflag.wait(timeout=10)
@@ -200,8 +220,6 @@ class ConnectionManager(object):
                 if len(self.events) == 0:
                     self.eventthreadflag.clear()
             time.sleep(0.1)
-
-
     def getPackageWithCorrelationId(self,id,retry=False):
         """
         Gets the package with the specified id
@@ -223,6 +241,11 @@ class ConnectionManager(object):
             self.messagesignal[id].wait(timeout=30)
             if id in self.messages.keys():
                 returnvalue=self.messages[id]
+            else:
+                newmsg=self.sentmessages[id]
+                self.adjustCorrelationId(newmsg)
+                self.sendPackage(newmsg)
+                return self.getPackageWithCorrelationId(newmsg.correlation,retry)
 
         if returnvalue is None:
             #ping the server to keep the connection alive
@@ -232,17 +255,16 @@ class ConnectionManager(object):
             if not alive:
                 self.deadconnections.append(self.corr_conn[id])
                 print "The connection seems to be dead..."
+            else:
+                print "ERROR: The connection is alive but the package could not be found!"
 
         return returnvalue
-
-
     def noconnections(self):
         """
         Raises an exception and quits
         :return: nothing
         """
         raise ValueError("ERROR: NO CONNECTIONS TO CLUSTER FOUND.  SHUTTING DOWN")
-
     def ping(self,connection):
         """
 
@@ -253,7 +275,7 @@ class ConnectionManager(object):
         self.adjustCorrelationId(msg)
         corrid=msg.correlation
         self.sendPackageOnConnection(msg,connection)
-        self.messageflag.wait(timeout=20)
+        self.messagesignal[corrid].wait(timeout=20)
         returnvalue=None
         if corrid in self.messages.keys():
             returnvalue=self.messages[corrid]
@@ -262,7 +284,6 @@ class ConnectionManager(object):
         else:
             boolean=False
         return boolean
-
     def removeconnection(self,conn):
         """
         removes the connection conn and any mappings from correlation id to the connection
@@ -278,7 +299,6 @@ class ConnectionManager(object):
                 self.corr_conn.pop(correlationid)
 
 class HazelConnection(asyncore.dispatcher):
-
     def __init__(self,address,port,manager,first=True):
         """
         Init function for a connection to the server
@@ -303,40 +323,35 @@ class HazelConnection(asyncore.dispatcher):
             msg=clientcodec.ClientAuthenticationCodec.encodeRequest(username,password,util.encode.encodestring(self.manager.uuid),util.encode.encodestring(self.manager.owneruuid),util.encode.encodeboolean(False))
         self.manager.adjustCorrelationId(msg)
         self.manager.messagesignal[msg.correlation]=threading.Event()
+        self.initmessage=msg
         self.initbuffer="CB2PHY"+msg.encodeMessage()
         self.connect((address,port))
-
-
     def handle_write(self):
+        """
+        Called whenever the client can write over the cluster
+        :return:
+        """
+        #don't let the queue block the thread!
         if not self._writequeue.empty():
             msg=self._writequeue.get()
-            print "writing to cluster!"
             self.send(msg)
-
-
     def sendmsg(self,msg):
         self._writequeue.put(msg)
     def handle_connect(self):
         """
         This function is called when the client connects
-        :return:
         """
         self.sendmsg(self.initbuffer)
-
     def handle_read(self):
         """
         This function is called when there is data available to be read
-        :return:
         """
         data=self.recv(2048)
         self.process_input(data)
-
-
     def process_input(self,input):
         """
         Process the input and put it in either received messages or events
         :param input: raw bytes received
-        :return:
         """
         while len(input) > 0:
             clientmsg=ClientMessage.decodeMessage(input)
@@ -350,7 +365,6 @@ class HazelConnection(asyncore.dispatcher):
                 self.manager.events.append(clientmsg)
             else:
                 self.manager.messagesignal[currentmsg.correlation].set()
-                if not self.manager.messageflag.is_set():
-                    self.manager.messageflag.set()
+
                 self.manager.messages[currentmsg.correlation]=currentinput
             input=input[msgsize:]

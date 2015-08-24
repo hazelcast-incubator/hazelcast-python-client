@@ -179,7 +179,7 @@ class ClientMembershipListenerCodec:
             messageType = clientMessage.getOperationType()
             if (messageType == eventconstant.EVENT_MEMBER):
                 member=None
-                member = com.hazelcast.client.impl.protocol.codec.MemberCodec.decode(clientMessage)
+                member = MemberCodec.decode(clientMessage)
                 eventType=None
                 eventType = clientMessage.extractIntFromPayload()
                 self.handler.handle(member, eventType)

@@ -66,11 +66,13 @@ def main():
     client=HazelcastClient(config)
     set=client.getList("my-list")
     print "Start time"
+    start=datetime.datetime.now()
     print datetime.datetime.now()
-    for i in range(100):
+    for i in range(1000):
         print i
         set.Get(i)
     print "finish"
+    print start
     print datetime.datetime.now()
 
     sys.exit()
