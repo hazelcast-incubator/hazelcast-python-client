@@ -19,9 +19,9 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueAddAllCodec.decodeResponse(msg2)
+        return queuecodec.QueueAddAllCodec.decodeResponse(msg2).response
     def AddListener(self,   includeValue, eventhandler):
-        msg=queuecodec.QueueAddListenerCodec.encodeRequest( encode.encodestring(self.title), includeValue)
+        msg=queuecodec.QueueAddListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(includeValue))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -29,7 +29,7 @@ class QueueProxy(object):
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=queuecodec.QueueAddListenerCodec.EventHandler(eventhandler)
-        return queuecodec.QueueAddListenerCodec.decodeResponse(msg2)
+        return queuecodec.QueueAddListenerCodec.decodeResponse(msg2).response
     def Clear(self,  ):
         msg=queuecodec.QueueClearCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -38,7 +38,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueClearCodec.decodeResponse(msg2)
+        return None
     def CompareAndRemoveAll(self,   dataList):
         msg=queuecodec.QueueCompareAndRemoveAllCodec.encodeRequest( encode.encodestring(self.title), dataList)
         retryable=msg.retryable
@@ -47,7 +47,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueCompareAndRemoveAllCodec.decodeResponse(msg2)
+        return queuecodec.QueueCompareAndRemoveAllCodec.decodeResponse(msg2).response
     def CompareAndRetainAll(self,   dataList):
         msg=queuecodec.QueueCompareAndRetainAllCodec.encodeRequest( encode.encodestring(self.title), dataList)
         retryable=msg.retryable
@@ -56,7 +56,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueCompareAndRetainAllCodec.decodeResponse(msg2)
+        return queuecodec.QueueCompareAndRetainAllCodec.decodeResponse(msg2).response
     def ContainsAll(self,   dataList):
         msg=queuecodec.QueueContainsAllCodec.encodeRequest( encode.encodestring(self.title), dataList)
         retryable=msg.retryable
@@ -65,7 +65,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueContainsAllCodec.decodeResponse(msg2)
+        return queuecodec.QueueContainsAllCodec.decodeResponse(msg2).response
     def Contains(self,   value):
         msg=queuecodec.QueueContainsCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
@@ -74,7 +74,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueContainsCodec.decodeResponse(msg2)
+        return queuecodec.QueueContainsCodec.decodeResponse(msg2).response
     def DrainTo(self,  ):
         msg=queuecodec.QueueDrainToCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -101,7 +101,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueIsEmptyCodec.decodeResponse(msg2)
+        return queuecodec.QueueIsEmptyCodec.decodeResponse(msg2).response
     def Iterator(self,  ):
         msg=queuecodec.QueueIteratorCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -120,7 +120,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueOfferCodec.decodeResponse(msg2)
+        return queuecodec.QueueOfferCodec.decodeResponse(msg2).response
     def Peek(self,  ):
         msg=queuecodec.QueuePeekCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -129,7 +129,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueuePeekCodec.decodeResponse(msg2)
+        return queuecodec.QueuePeekCodec.decodeResponse(msg2).response
     def Poll(self,   timeoutMillis):
         msg=queuecodec.QueuePollCodec.encodeRequest( encode.encodestring(self.title), timeoutMillis)
         retryable=msg.retryable
@@ -138,7 +138,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueuePollCodec.decodeResponse(msg2)
+        return queuecodec.QueuePollCodec.decodeResponse(msg2).response
     def Put(self,   value):
         msg=queuecodec.QueuePutCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
@@ -147,7 +147,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueuePutCodec.decodeResponse(msg2)
+        return None
     def RemainingCapacity(self,  ):
         msg=queuecodec.QueueRemainingCapacityCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -156,7 +156,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueRemainingCapacityCodec.decodeResponse(msg2)
+        return queuecodec.QueueRemainingCapacityCodec.decodeResponse(msg2).response
     def Remove(self,   value):
         msg=queuecodec.QueueRemoveCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
@@ -165,7 +165,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueRemoveCodec.decodeResponse(msg2)
+        return queuecodec.QueueRemoveCodec.decodeResponse(msg2).response
     def RemoveListener(self,   registrationId):
         msg=queuecodec.QueueRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
         retryable=msg.retryable
@@ -183,7 +183,7 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueSizeCodec.decodeResponse(msg2)
+        return queuecodec.QueueSizeCodec.decodeResponse(msg2).response
     def Take(self,  ):
         msg=queuecodec.QueueTakeCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -192,4 +192,4 @@ class QueueProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return queuecodec.QueueTakeCodec.decodeResponse(msg2)
+        return queuecodec.QueueTakeCodec.decodeResponse(msg2).response

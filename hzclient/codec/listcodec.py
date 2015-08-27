@@ -1,6 +1,8 @@
 import ctypes
 from hzclient.clientmessage import ClientMessage
 from util import util
+from util import encode
+
 import eventconstant
 
 
@@ -52,7 +54,7 @@ class ListAddAllCodec:
     @classmethod
     def encodeRequest(cls, name, valueList):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(ListAddAllCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(ListAddAllCodec.REQUEST_TYPE)
         clientMessage.setRetryable(ListAddAllCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(valueList.size())
@@ -181,9 +183,9 @@ class ListAddCodec:
     @classmethod
     def encodeRequest(cls, name, value):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(ListAddCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(ListAddCodec.REQUEST_TYPE)
         clientMessage.setRetryable(ListAddCodec.RETRYABLE)
-        clientMessage.set(name)
+        clientMessage.set(encode.encodestring(name))
         clientMessage.set(value)
         clientMessage.updateSize()
         return clientMessage
@@ -236,7 +238,7 @@ class ListAddListenerCodec:
     @classmethod
     def encodeRequest(cls, name, includeValue):
         clientMessage = ClientMessage()
-        clientMessage.setOperationType(ListAddListenerCodec.REQUEST_TYPE.id)
+        clientMessage.setOperationType(ListAddListenerCodec.REQUEST_TYPE)
         clientMessage.setRetryable(ListAddListenerCodec.RETRYABLE)
         clientMessage.set(name)
         clientMessage.set(includeValue)

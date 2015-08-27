@@ -1,6 +1,7 @@
 __author__ = 'jonathanbrodie'
 from hzclient.codec import setcodec,proxycodec
 from hzclient.clientmessage import ClientMessage
+from util import encode
 
 
 class SetProxy(object):
@@ -16,7 +17,7 @@ class SetProxy(object):
         else:
             "Couldn't initalize"
     def AddAll(self,   valueList):
-        msg=setcodec.SetAddAllCodec.encodeRequest( self.title, valueList)
+        msg=setcodec.SetAddAllCodec.encodeRequest( encode.encodestring(self.title), valueList)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -25,7 +26,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetAddAllCodec.decodeResponse(msg2)
     def Add(self,   value):
-        msg=setcodec.SetAddCodec.encodeRequest( self.title, value)
+        msg=setcodec.SetAddCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -34,7 +35,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetAddCodec.decodeResponse(msg2)
     def AddListener(self,   includeValue, eventhandler):
-        msg=setcodec.SetAddListenerCodec.encodeRequest( self.title, includeValue)
+        msg=setcodec.SetAddListenerCodec.encodeRequest( encode.encodestring(self.title), includeValue)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -44,7 +45,7 @@ class SetProxy(object):
         self.connection.eventregistry[correlationid]=setcodec.SetAddListenerCodec.EventHandler(eventhandler)
         return setcodec.SetAddListenerCodec.decodeResponse(msg2)
     def Clear(self,  ):
-        msg=setcodec.SetClearCodec.encodeRequest( self.title)
+        msg=setcodec.SetClearCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -53,7 +54,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetClearCodec.decodeResponse(msg2)
     def CompareAndRemoveAll(self,   valueSet):
-        msg=setcodec.SetCompareAndRemoveAllCodec.encodeRequest( self.title, valueSet)
+        msg=setcodec.SetCompareAndRemoveAllCodec.encodeRequest( encode.encodestring(self.title), valueSet)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -62,7 +63,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetCompareAndRemoveAllCodec.decodeResponse(msg2)
     def CompareAndRetainAll(self,   valueSet):
-        msg=setcodec.SetCompareAndRetainAllCodec.encodeRequest( self.title, valueSet)
+        msg=setcodec.SetCompareAndRetainAllCodec.encodeRequest( encode.encodestring(self.title), valueSet)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -71,7 +72,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetCompareAndRetainAllCodec.decodeResponse(msg2)
     def ContainsAll(self,   valueSet):
-        msg=setcodec.SetContainsAllCodec.encodeRequest( self.title, valueSet)
+        msg=setcodec.SetContainsAllCodec.encodeRequest( encode.encodestring(self.title), valueSet)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -85,7 +86,7 @@ class SetProxy(object):
         :param value: value to check
         :return: boolean true or false
         """
-        msg=setcodec.SetContainsCodec.encodeRequest( self.title, value)
+        msg=setcodec.SetContainsCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
         self.connection.adjustPartitionId(msg,"a")
         self.connection.adjustCorrelationId(msg)
@@ -96,7 +97,7 @@ class SetProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return setcodec.SetContainsCodec.decodeResponse(msg2)
     def GetAll(self,  ):
-        msg=setcodec.SetGetAllCodec.encodeRequest( self.title)
+        msg=setcodec.SetGetAllCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -109,7 +110,7 @@ class SetProxy(object):
         Determine if the set is empty
         :return: boolean for true or false
         """
-        msg=setcodec.SetIsEmptyCodec.encodeRequest( self.title)
+        msg=setcodec.SetIsEmptyCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
 
@@ -125,7 +126,7 @@ class SetProxy(object):
         :param value: value to remove
         :return:
         """
-        msg=setcodec.SetRemoveCodec.encodeRequest( self.title, value)
+        msg=setcodec.SetRemoveCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         self.connection.adjustPartitionId(msg,value)
@@ -136,7 +137,7 @@ class SetProxy(object):
         return setcodec.SetRemoveCodec.decodeResponse(msg2)
     def RemoveListener(self, registrationId):
 
-        msg=setcodec.SetRemoveListenerCodec.encodeRequest( self.title, registrationId)
+        msg=setcodec.SetRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -149,7 +150,7 @@ class SetProxy(object):
 
         :return: size of set
         """
-        msg=setcodec.SetSizeCodec.encodeRequest(self.title)
+        msg=setcodec.SetSizeCodec.encodeRequest(encode.encodestring(self.title))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation

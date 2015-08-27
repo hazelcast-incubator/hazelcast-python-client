@@ -24,7 +24,7 @@ class ConnectionManager(object):
         self.events=[]
         self.eventregistry={}
         self.partitiontable=None
-        firstConnection=HazelConnection('192.168.1.186',5701,self)
+        firstConnection=HazelConnection(config.gethost(),config.getport(),self)
         self.connections.append(firstConnection)
 
         self.iothread=threading.Thread(target=self.ioloop)
@@ -236,9 +236,8 @@ class ConnectionManager(object):
 
         if retry and id not in self.messages.keys():
             print "retrying"
-            time.sleep(5)
 
-            self.messagesignal[id].wait(timeout=30)
+            self.messagesignal[id].wait(timeout=15)
             if id in self.messages.keys():
                 returnvalue=self.messages[id]
             else:

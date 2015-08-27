@@ -23,7 +23,7 @@ def demo1():
     client=HazelcastClient(config)
     list=client.getList("my-list")
     i=0
-    while list.Size().response > 0:
+    while list.Size() > 0:
         list.RemoveWithIndex(0)
     print "All items from my-list have been removed"
     sys.exit()
@@ -37,10 +37,12 @@ def demo2():
     topic.publish(util.hzstringbytes(string))
     sys.exit()
 def demo3():
+    print "uh"
     config=Config()
     config.set_username("dev")
     config.set_password("dev-pass")
     client=HazelcastClient(config)
+    print "uh"
     map=client.getMap("my-map")
     registrationId=map.AddEntryListener(True,MyEntryHandler()).response
 
@@ -77,4 +79,4 @@ def main():
 
     sys.exit()
 if __name__ == '__main__':
-    main()
+    demo3()

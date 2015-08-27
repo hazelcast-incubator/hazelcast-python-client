@@ -104,7 +104,7 @@ class CacheAddEntryListenerCodec:
         return clientMessage
 
     class EventHandler:
-        def __init__(self,handler)
+        def __init__(self,handler):
             self.handler=handler
         def handle(self, clientMessage):
             messageType = clientMessage.getOperationType()

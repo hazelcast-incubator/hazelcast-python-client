@@ -5,6 +5,8 @@ class Config:
     def __init__(self):
         self._username=""
         self._password=""
+        self._targethost="127.0.0.1"
+        self._port=5701
         self.ssl=False
         #any other configurations that need to be used
 
@@ -16,3 +18,12 @@ class Config:
         return self._username
     def get_password(self):
         return self._password
+
+    def sethost(self,host):
+        self._targethost=host
+    def setport(self,newport):
+        self._port=newport
+    def gethost(self):
+        return self._targethost
+    def getport(self):
+        return self._port
