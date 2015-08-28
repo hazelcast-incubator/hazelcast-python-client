@@ -29,7 +29,6 @@ class CacheMessageType:
     CACHE_REMOVE=0x1517
     CACHE_REPLACE=0x1518
     CACHE_SIZE=0x1519
-    id=None
 
     def ___init__(self, messageType):
         self.id = messageType
@@ -221,45 +220,45 @@ class CacheAddInvalidationListenerCodec:
 
 
 
-class EventHandler:
-    def __init__(self,handler):
-        self.handler=handler
-    def handle(self, clientMessage):
-        messageType = clientMessage.getOperationType()
-        if (messageType == eventconstant.EVENT_CACHEINVALIDATION):
-            name=None
-            name = clientMessage.extractStringFromPayload()
-            key=None
-            key_isNull = clientMessage.extractBooleanFromPayload()
-            if not key_isNull:
-                key = clientMessage.extractBytesFromPayload()
-            sourceUuid=None
-            sourceUuid_isNull = clientMessage.extractBooleanFromPayload()
-            if not sourceUuid_isNull:
-                sourceUuid = clientMessage.extractStringFromPayload()
-            self.handler.handle(name, key, sourceUuid)
-            return
-        if (messageType == eventconstant.EVENT_CACHEBATCHINVALIDATION):
-            name=None
-            name = clientMessage.extractStringFromPayload()
-            keys=None
-            keys_size = clientMessage.extractIntFromPayload()
-            keys = []
-            for i in range(keys_size):
-                keys_item=None
-                keys_item = clientMessage.extractBytesFromPayload()
-                keys.append(keys_item)
-            sourceUuids=None
-            sourceUuids_isNull = clientMessage.extractBooleanFromPayload()
-            if not sourceUuids_isNull:
-                sourceUuids_size = clientMessage.extractIntFromPayload()
-                sourceUuids = []
-                for i in range(sourceUuids_size):
-                    sourceUuids_item=None
-            sourceUuids_item = clientMessage.extractStringFromPayload()
-            sourceUuids.append(sourceUuids_item)
-            self.handler.handle(name, keys, sourceUuids)
-            return
+    class EventHandler:
+        def __init__(self,handler):
+            self.handler=handler
+        def handle(self, clientMessage):
+            messageType = clientMessage.getOperationType()
+            if (messageType == eventconstant.EVENT_CACHEINVALIDATION):
+                name=None
+                name = clientMessage.extractStringFromPayload()
+                key=None
+                key_isNull = clientMessage.extractBooleanFromPayload()
+                if not key_isNull:
+                    key = clientMessage.extractBytesFromPayload()
+                sourceUuid=None
+                sourceUuid_isNull = clientMessage.extractBooleanFromPayload()
+                if not sourceUuid_isNull:
+                    sourceUuid = clientMessage.extractStringFromPayload()
+                self.handler.handle(name, key, sourceUuid)
+                return
+            if (messageType == eventconstant.EVENT_CACHEBATCHINVALIDATION):
+                name=None
+                name = clientMessage.extractStringFromPayload()
+                keys=None
+                keys_size = clientMessage.extractIntFromPayload()
+                keys = []
+                for i in range(keys_size):
+                    keys_item=None
+                    keys_item = clientMessage.extractBytesFromPayload()
+                    keys.append(keys_item)
+                sourceUuids=None
+                sourceUuids_isNull = clientMessage.extractBooleanFromPayload()
+                if not sourceUuids_isNull:
+                    sourceUuids_size = clientMessage.extractIntFromPayload()
+                    sourceUuids = []
+                    for i in range(sourceUuids_size):
+                        sourceUuids_item=None
+                sourceUuids_item = clientMessage.extractStringFromPayload()
+                sourceUuids.append(sourceUuids_item)
+                self.handler.handle(name, keys, sourceUuids)
+                return
 class CacheClearCodec:
     REQUEST_TYPE = CacheMessageType.CACHE_CLEAR
     RESPONSE_TYPE = 100
@@ -1399,9 +1398,9 @@ class CachePutIfAbsentCodec:
         parameters=CachePutIfAbsentCodec.ResponseParameters()
         response=None
         response = clientMessage.extractBooleanFromPayload()
-    parameters.response = response
+        parameters.response = response
 
-    return parameters
+        return parameters
 
 class CacheRemoveAllCodec:
     REQUEST_TYPE = CacheMessageType.CACHE_REMOVEALL

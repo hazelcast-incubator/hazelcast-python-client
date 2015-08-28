@@ -43,12 +43,8 @@ class TopicProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return topiccodec.TopicAddMessageListenerCodec.decodeResponse(msg2)
 
-    def removeMessageListener(self):
-        registrationId=None
-        for key, value in self.connection.events.iteritems():
-            if isinstance(topiccodec.TopicAddMessageListenerCodec.EventHandler,value):
-                registrationId=key
-        msg=topiccodec.TopicRemoveMessageListenerCodec.encodeRequest(self.title,registrationId)
+    def removeMessageListener(self,registrationId):
+        msg=topiccodec.TopicRemoveMessageListenerCodec.encodeRequest(encode.encodestring(self.title),encode.encodestring(registrationId))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation

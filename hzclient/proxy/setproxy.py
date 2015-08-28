@@ -24,7 +24,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetAddAllCodec.decodeResponse(msg2)
+        return setcodec.SetAddAllCodec.decodeResponse(msg2).response
     def Add(self,   value):
         msg=setcodec.SetAddCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
@@ -33,9 +33,9 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetAddCodec.decodeResponse(msg2)
+        return setcodec.SetAddCodec.decodeResponse(msg2).response
     def AddListener(self,   includeValue, eventhandler):
-        msg=setcodec.SetAddListenerCodec.encodeRequest( encode.encodestring(self.title), includeValue)
+        msg=setcodec.SetAddListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(includeValue))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -43,7 +43,7 @@ class SetProxy(object):
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=setcodec.SetAddListenerCodec.EventHandler(eventhandler)
-        return setcodec.SetAddListenerCodec.decodeResponse(msg2)
+        return setcodec.SetAddListenerCodec.decodeResponse(msg2).response
     def Clear(self,  ):
         msg=setcodec.SetClearCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -61,7 +61,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetCompareAndRemoveAllCodec.decodeResponse(msg2)
+        return setcodec.SetCompareAndRemoveAllCodec.decodeResponse(msg2).response
     def CompareAndRetainAll(self,   valueSet):
         msg=setcodec.SetCompareAndRetainAllCodec.encodeRequest( encode.encodestring(self.title), valueSet)
         retryable=msg.retryable
@@ -70,7 +70,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetCompareAndRetainAllCodec.decodeResponse(msg2)
+        return setcodec.SetCompareAndRetainAllCodec.decodeResponse(msg2).response
     def ContainsAll(self,   valueSet):
         msg=setcodec.SetContainsAllCodec.encodeRequest( encode.encodestring(self.title), valueSet)
         retryable=msg.retryable
@@ -79,7 +79,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetContainsAllCodec.decodeResponse(msg2)
+        return setcodec.SetContainsAllCodec.decodeResponse(msg2).response
     def Contains(self,   value):
         """
         Check if value is in the set
@@ -95,7 +95,7 @@ class SetProxy(object):
         print msg.partition
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetContainsCodec.decodeResponse(msg2)
+        return setcodec.SetContainsCodec.decodeResponse(msg2).response
     def GetAll(self,  ):
         msg=setcodec.SetGetAllCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -104,7 +104,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetGetAllCodec.decodeResponse(msg2)
+        return setcodec.SetGetAllCodec.decodeResponse(msg2).list
     def IsEmpty(self,  ):
         """
         Determine if the set is empty
@@ -118,7 +118,7 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetIsEmptyCodec.decodeResponse(msg2)
+        return setcodec.SetIsEmptyCodec.decodeResponse(msg2).response
 
     def Remove(self, value):
         """
@@ -134,10 +134,10 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetRemoveCodec.decodeResponse(msg2)
+        return setcodec.SetRemoveCodec.decodeResponse(msg2).response
     def RemoveListener(self, registrationId):
 
-        msg=setcodec.SetRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
+        msg=setcodec.SetRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(registrationId))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -157,4 +157,4 @@ class SetProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.receivePackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return setcodec.SetSizeCodec.decodeResponse(msg2)
+        return setcodec.SetSizeCodec.decodeResponse(msg2).response

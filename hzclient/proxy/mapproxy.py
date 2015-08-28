@@ -25,7 +25,7 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddEntryListenerCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddEntryListenerCodec.decodeResponse(msg2)
+        return mapcodec.MapAddEntryListenerCodec.decodeResponse(msg2).response
     def AddEntryListenerToKey(self,   key, includeValue, eventhandler):
         msg=mapcodec.MapAddEntryListenerToKeyCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeboolean(includeValue))
         retryable=msg.retryable
@@ -35,7 +35,7 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddEntryListenerToKeyCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddEntryListenerToKeyCodec.decodeResponse(msg2)
+        return mapcodec.MapAddEntryListenerToKeyCodec.decodeResponse(msg2).response
     def AddEntryListenerToKeyWithPredicate(self,   key, predicate, includeValue, eventhandler):
         msg=mapcodec.MapAddEntryListenerToKeyWithPredicateCodec.encodeRequest( encode.encodestring(self.title), key, predicate, encode.encodeboolean(includeValue))
         retryable=msg.retryable
@@ -45,7 +45,7 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddEntryListenerToKeyWithPredicateCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddEntryListenerToKeyWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapAddEntryListenerToKeyWithPredicateCodec.decodeResponse(msg2).response
     def AddEntryListenerWithPredicate(self,   predicate, includeValue, eventhandler):
         msg=mapcodec.MapAddEntryListenerWithPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate, encode.encodeboolean(includeValue))
         retryable=msg.retryable
@@ -55,9 +55,9 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddEntryListenerWithPredicateCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddEntryListenerWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapAddEntryListenerWithPredicateCodec.decodeResponse(msg2).response
     def AddIndex(self,   attribute, ordered):
-        msg=mapcodec.MapAddIndexCodec.encodeRequest( encode.encodestring(self.title), attribute, ordered)
+        msg=mapcodec.MapAddIndexCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(attribute), encode.encodeboolean(ordered))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -73,7 +73,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapAddInterceptorCodec.decodeResponse(msg2)
+        return mapcodec.MapAddInterceptorCodec.decodeResponse(msg2).response
     def AddNearCacheEntryListener(self,   includeValue, eventhandler):
         msg=mapcodec.MapAddNearCacheEntryListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(includeValue))
         retryable=msg.retryable
@@ -83,7 +83,7 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddNearCacheEntryListenerCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddNearCacheEntryListenerCodec.decodeResponse(msg2)
+        return mapcodec.MapAddNearCacheEntryListenerCodec.decodeResponse(msg2).response
     def AddPartitionLostListener(self,   eventhandler):
         msg=mapcodec.MapAddPartitionLostListenerCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -93,7 +93,7 @@ class MapProxy(object):
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
         self.connection.eventregistry[correlationid]=mapcodec.MapAddPartitionLostListenerCodec.EventHandler(eventhandler)
-        return mapcodec.MapAddPartitionLostListenerCodec.decodeResponse(msg2)
+        return mapcodec.MapAddPartitionLostListenerCodec.decodeResponse(msg2).response
     def Clear(self,  ):
         msg=mapcodec.MapClearCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -112,7 +112,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapContainsKeyCodec.decodeResponse(msg2)
+        return mapcodec.MapContainsKeyCodec.decodeResponse(msg2).response
     def ContainsValue(self,   value):
         msg=mapcodec.MapContainsValueCodec.encodeRequest( encode.encodestring(self.title), value)
         retryable=msg.retryable
@@ -121,7 +121,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapContainsValueCodec.decodeResponse(msg2)
+        return mapcodec.MapContainsValueCodec.decodeResponse(msg2).response
     def Delete(self,   key, threadId):
         msg=mapcodec.MapDeleteCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -139,7 +139,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapEntriesWithPagingPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapEntriesWithPagingPredicateCodec.decodeResponse(msg2).entrySet
     def EntriesWithPredicate(self,   predicate):
         msg=mapcodec.MapEntriesWithPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate)
         retryable=msg.retryable
@@ -148,7 +148,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapEntriesWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapEntriesWithPredicateCodec.decodeResponse(msg2).entrySet
     def EntrySet(self,  ):
         msg=mapcodec.MapEntrySetCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -157,7 +157,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapEntrySetCodec.decodeResponse(msg2)
+        return mapcodec.MapEntrySetCodec.decodeResponse(msg2).entrySet
     def EvictAll(self,  ):
         msg=mapcodec.MapEvictAllCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -175,7 +175,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapEvictCodec.decodeResponse(msg2)
+        return mapcodec.MapEvictCodec.decodeResponse(msg2).response
     def ExecuteOnAllKeys(self,   entryProcessor):
         msg=mapcodec.MapExecuteOnAllKeysCodec.encodeRequest( encode.encodestring(self.title), entryProcessor)
         retryable=msg.retryable
@@ -184,7 +184,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapExecuteOnAllKeysCodec.decodeResponse(msg2)
+        return mapcodec.MapExecuteOnAllKeysCodec.decodeResponse(msg2).entrySet
     def ExecuteOnKey(self,   entryProcessor, key):
         msg=mapcodec.MapExecuteOnKeyCodec.encodeRequest( encode.encodestring(self.title), entryProcessor, key)
         retryable=msg.retryable
@@ -193,7 +193,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapExecuteOnKeyCodec.decodeResponse(msg2)
+        return mapcodec.MapExecuteOnKeyCodec.decodeResponse(msg2).response
     def ExecuteOnKeys(self,   entryProcessor, keys):
         msg=mapcodec.MapExecuteOnKeysCodec.encodeRequest( encode.encodestring(self.title), entryProcessor, keys)
         retryable=msg.retryable
@@ -202,7 +202,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapExecuteOnKeysCodec.decodeResponse(msg2)
+        return mapcodec.MapExecuteOnKeysCodec.decodeResponse(msg2).entrySet
     def ExecuteWithPredicate(self,   entryProcessor, predicate):
         msg=mapcodec.MapExecuteWithPredicateCodec.encodeRequest( encode.encodestring(self.title), entryProcessor, predicate)
         retryable=msg.retryable
@@ -211,7 +211,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapExecuteWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapExecuteWithPredicateCodec.decodeResponse(msg2).entrySet
     def Flush(self,  ):
         msg=mapcodec.MapFlushCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -238,7 +238,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapGetAllCodec.decodeResponse(msg2)
+        return mapcodec.MapGetAllCodec.decodeResponse(msg2).entrySet
     def GetAsync(self,   key, threadId):
         msg=mapcodec.MapGetAsyncCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -247,7 +247,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapGetAsyncCodec.decodeResponse(msg2)
+        return mapcodec.MapGetAsyncCodec.decodeResponse(msg2).response
     def Get(self,   key, threadId):
         msg=mapcodec.MapGetCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -257,7 +257,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapGetCodec.decodeResponse(msg2)
+        return mapcodec.MapGetCodec.decodeResponse(msg2).response
     def GetEntryView(self,   key, threadId):
         msg=mapcodec.MapGetEntryViewCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -266,7 +266,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapGetEntryViewCodec.decodeResponse(msg2)
+        return mapcodec.MapGetEntryViewCodec.decodeResponse(msg2).dataEntryView
     def IsEmpty(self,  ):
         msg=mapcodec.MapIsEmptyCodec.encodeRequest( encode.encodestring(self.title))
         retryable=msg.retryable
@@ -275,7 +275,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapIsEmptyCodec.decodeResponse(msg2)
+        return mapcodec.MapIsEmptyCodec.decodeResponse(msg2).response
     def IsLocked(self,   key):
         msg=mapcodec.MapIsLockedCodec.encodeRequest( encode.encodestring(self.title), key)
         retryable=msg.retryable
@@ -284,7 +284,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapIsLockedCodec.decodeResponse(msg2)
+        return mapcodec.MapIsLockedCodec.decodeResponse(msg2).response
     def KeySet(self):
         msg=mapcodec.MapKeySetCodec.encodeRequest(encode.encodestring(self.title))
         retryable=msg.retryable
@@ -293,7 +293,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapKeySetCodec.decodeResponse(msg2)
+        return mapcodec.MapKeySetCodec.decodeResponse(msg2).set
     def KeySetWithPagingPredicate(self,   predicate):
         msg=mapcodec.MapKeySetWithPagingPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate)
         retryable=msg.retryable
@@ -302,7 +302,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapKeySetWithPagingPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapKeySetWithPagingPredicateCodec.decodeResponse(msg2).set
     def KeySetWithPredicate(self,   predicate):
         msg=mapcodec.MapKeySetWithPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate)
         retryable=msg.retryable
@@ -311,7 +311,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapKeySetWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapKeySetWithPredicateCodec.decodeResponse(msg2).set
     def LoadAll(self,   replaceExistingValues):
         msg=mapcodec.MapLoadAllCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(replaceExistingValues))
         retryable=msg.retryable
@@ -322,7 +322,7 @@ class MapProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return mapcodec.MapLoadAllCodec.decodeResponse(msg2)
     def LoadGivenKeys(self,   keys, replaceExistingValues):
-        msg=mapcodec.MapLoadGivenKeysCodec.encodeRequest( encode.encodestring(self.title), keys, replaceExistingValues)
+        msg=mapcodec.MapLoadGivenKeysCodec.encodeRequest( encode.encodestring(self.title), keys, encode.encodeboolean(replaceExistingValues))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -331,7 +331,7 @@ class MapProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return mapcodec.MapLoadGivenKeysCodec.decodeResponse(msg2)
     def Lock(self,   key, threadId, ttl):
-        msg=mapcodec.MapLockCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapLockCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -349,16 +349,16 @@ class MapProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return mapcodec.MapPutAllCodec.decodeResponse(msg2)
     def PutAsync(self,   key, value, threadId, ttl):
-        msg=mapcodec.MapPutAsyncCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapPutAsyncCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapPutAsyncCodec.decodeResponse(msg2)
+        return mapcodec.MapPutAsyncCodec.decodeResponse(msg2).response
     def Put(self,   key, value, threadId, ttl):
-        msg=mapcodec.MapPutCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapPutCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         self.connection.adjustPartitionId(msg,key)
@@ -366,18 +366,18 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapPutCodec.decodeResponse(msg2)
+        return mapcodec.MapPutCodec.decodeResponse(msg2).response
     def PutIfAbsent(self,   key, value, threadId, ttl):
-        msg=mapcodec.MapPutIfAbsentCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapPutIfAbsentCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapPutIfAbsentCodec.decodeResponse(msg2)
+        return mapcodec.MapPutIfAbsentCodec.decodeResponse(msg2).response
     def PutTransient(self,   key, value, threadId, ttl):
-        msg=mapcodec.MapPutTransientCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapPutTransientCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -393,7 +393,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemoveAsyncCodec.decodeResponse(msg2)
+        return mapcodec.MapRemoveAsyncCodec.decodeResponse(msg2).response
     def Remove(self,   key, threadId):
         msg=mapcodec.MapRemoveCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -402,16 +402,16 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemoveCodec.decodeResponse(msg2)
+        return mapcodec.MapRemoveCodec.decodeResponse(msg2).response
     def RemoveEntryListener(self,   registrationId):
-        msg=mapcodec.MapRemoveEntryListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
+        msg=mapcodec.MapRemoveEntryListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(registrationId))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemoveEntryListenerCodec.decodeResponse(msg2)
+        return mapcodec.MapRemoveEntryListenerCodec.decodeResponse(msg2).response
     def RemoveIfSame(self,   key, value, threadId):
         msg=mapcodec.MapRemoveIfSameCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -420,25 +420,25 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemoveIfSameCodec.decodeResponse(msg2)
+        return mapcodec.MapRemoveIfSameCodec.decodeResponse(msg2).response
     def RemoveInterceptor(self,   id):
-        msg=mapcodec.MapRemoveInterceptorCodec.encodeRequest( encode.encodestring(self.title), id)
+        msg=mapcodec.MapRemoveInterceptorCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(id))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemoveInterceptorCodec.decodeResponse(msg2)
+        return mapcodec.MapRemoveInterceptorCodec.decodeResponse(msg2).response
     def RemovePartitionLostListener(self,   registrationId):
-        msg=mapcodec.MapRemovePartitionLostListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
+        msg=mapcodec.MapRemovePartitionLostListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(registrationId))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapRemovePartitionLostListenerCodec.decodeResponse(msg2)
+        return mapcodec.MapRemovePartitionLostListenerCodec.decodeResponse(msg2).response
     def Replace(self,   key, value, threadId):
         msg=mapcodec.MapReplaceCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -447,7 +447,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapReplaceCodec.decodeResponse(msg2)
+        return mapcodec.MapReplaceCodec.decodeResponse(msg2).response
     def ReplaceIfSame(self,   key, testValue, value, threadId):
         msg=mapcodec.MapReplaceIfSameCodec.encodeRequest( encode.encodestring(self.title), key, testValue, value, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -456,9 +456,9 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapReplaceIfSameCodec.decodeResponse(msg2)
+        return mapcodec.MapReplaceIfSameCodec.decodeResponse(msg2).response
     def Set(self,   key, value, threadId, ttl):
-        msg=mapcodec.MapSetCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), ttl)
+        msg=mapcodec.MapSetCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(ttl))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -474,7 +474,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg)
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapSizeCodec.decodeResponse(msg2)
+        return mapcodec.MapSizeCodec.decodeResponse(msg2).response
     def SubmitToKey(self,   entryProcessor, key):
         msg=mapcodec.MapSubmitToKeyCodec.encodeRequest( encode.encodestring(self.title), entryProcessor, key)
         retryable=msg.retryable
@@ -483,34 +483,34 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapSubmitToKeyCodec.decodeResponse(msg2)
+        return mapcodec.MapSubmitToKeyCodec.decodeResponse(msg2).response
     def TryLock(self,   key, threadId, lease, timeout):
-        msg=mapcodec.MapTryLockCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), lease, timeout)
+        msg=mapcodec.MapTryLockCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), encode.encodeint64(lease), encode.encodeint64(timeout))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapTryLockCodec.decodeResponse(msg2)
+        return mapcodec.MapTryLockCodec.decodeResponse(msg2).response
     def TryPut(self,   key, value, threadId, timeout):
-        msg=mapcodec.MapTryPutCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), timeout)
+        msg=mapcodec.MapTryPutCodec.encodeRequest( encode.encodestring(self.title), key, value, encode.encodeint64(threadId), encode.encodeint64(timeout))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapTryPutCodec.decodeResponse(msg2)
+        return mapcodec.MapTryPutCodec.decodeResponse(msg2).response
     def TryRemove(self,   key, threadId, timeout):
-        msg=mapcodec.MapTryRemoveCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), timeout)
+        msg=mapcodec.MapTryRemoveCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId), encode.encodeint64(timeout))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapTryRemoveCodec.decodeResponse(msg2)
+        return mapcodec.MapTryRemoveCodec.decodeResponse(msg2).response
     def Unlock(self,   key, threadId):
         msg=mapcodec.MapUnlockCodec.encodeRequest( encode.encodestring(self.title), key, encode.encodeint64(threadId))
         retryable=msg.retryable
@@ -528,7 +528,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapValuesCodec.decodeResponse(msg2)
+        return mapcodec.MapValuesCodec.decodeResponse(msg2).list
     def ValuesWithPagingPredicate(self,   predicate):
         msg=mapcodec.MapValuesWithPagingPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate)
         retryable=msg.retryable
@@ -537,7 +537,7 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapValuesWithPagingPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapValuesWithPagingPredicateCodec.decodeResponse(msg2).entrySet
     def ValuesWithPredicate(self,   predicate):
         msg=mapcodec.MapValuesWithPredicateCodec.encodeRequest( encode.encodestring(self.title), predicate)
         retryable=msg.retryable
@@ -546,4 +546,4 @@ class MapProxy(object):
         self.connection.sendPackage(msg.encodeMessage())
         response=self.connection.getPackageWithCorrelationId(correlationid,retryable)
         msg2=ClientMessage.decodeMessage(response)
-        return mapcodec.MapValuesWithPredicateCodec.decodeResponse(msg2)
+        return mapcodec.MapValuesWithPredicateCodec.decodeResponse(msg2).list

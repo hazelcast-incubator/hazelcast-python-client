@@ -28,7 +28,7 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListAddAllCodec.decodeResponse(msg2)
     def AddAllWithIndex(self,   index, valueList):
-        msg=listcodec.ListAddAllWithIndexCodec.encodeRequest( encode.encodestring(self.title), index, valueList)
+        msg=listcodec.ListAddAllWithIndexCodec.encodeRequest( encode.encodestring(self.title), encode.encodeint32(index), valueList)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -46,7 +46,7 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListAddCodec.decodeResponse(msg2)
     def AddListener(self,   includeValue, eventhandler):
-        msg=listcodec.ListAddListenerCodec.encodeRequest( encode.encodestring(self.title), includeValue)
+        msg=listcodec.ListAddListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodeboolean(includeValue))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -56,7 +56,7 @@ class ListProxy(object):
         self.connection.eventregistry[correlationid]=listcodec.ListAddListenerCodec.EventHandler(eventhandler)
         return listcodec.ListAddListenerCodec.decodeResponse(msg2)
     def AddWithIndex(self,   index, value):
-        msg=listcodec.ListAddWithIndexCodec.encodeRequest( encode.encodestring(self.title), index, value)
+        msg=listcodec.ListAddWithIndexCodec.encodeRequest( encode.encodestring(self.title), encode.encodeint32(index), value)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -167,7 +167,7 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListLastIndexOfCodec.decodeResponse(msg2).response
     def ListIterator(self,   index):
-        msg=listcodec.ListListIteratorCodec.encodeRequest( encode.encodestring(self.title), index)
+        msg=listcodec.ListListIteratorCodec.encodeRequest( encode.encodestring(self.title), encode.encodeint32(index))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -185,7 +185,7 @@ class ListProxy(object):
         msg2=ClientMessage.decodeMessage(response)
         return listcodec.ListRemoveCodec.decodeResponse(msg2).response
     def RemoveListener(self,   registrationId):
-        msg=listcodec.ListRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), registrationId)
+        msg=listcodec.ListRemoveListenerCodec.encodeRequest( encode.encodestring(self.title), encode.encodestring(registrationId))
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation
@@ -205,7 +205,7 @@ class ListProxy(object):
         return listcodec.ListRemoveWithIndexCodec.decodeResponse(msg2).response
 
     def Set(self,   index, value):
-        msg=listcodec.ListSetCodec.encodeRequest( encode.encodestring(self.title), index, value)
+        msg=listcodec.ListSetCodec.encodeRequest( encode.encodestring(self.title), encode.encodeint32(index), value)
         retryable=msg.retryable
         self.connection.adjustCorrelationId(msg)
         correlationid=msg.correlation

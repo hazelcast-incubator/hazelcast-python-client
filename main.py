@@ -54,13 +54,6 @@ def demo3():
     sys.exit()
 
 
-def demo4():
-    client=HazelcastClient()
-    list=client.getList("my-list")
-
-    while list.Size().response < 20:
-        time.sleep(0.5)
-
 def main():
     config=Config()
     config.set_username("dev")
